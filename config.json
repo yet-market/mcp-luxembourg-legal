@@ -1,0 +1,33 @@
+{
+  "mcpServers": [
+    {
+      "name": "sparql",
+      "command": "python3",
+      "args": [
+        "/path/to/server.py",
+        "--endpoint",
+        "https://data.legilux.public.lu/sparqlendpoint",
+        "--format",
+        "simplified",
+        "--cache-enabled",
+        "true",
+        "--cache-ttl",
+        "300",
+        "--cache-strategy",
+        "lru"
+      ],
+      "env": {
+        "SPARQL_ENDPOINT": "https://data.legilux.public.lu/sparqlendpoint",
+        "SPARQL_TIMEOUT": "30",
+        "SPARQL_MAX_RESULTS": "1000",
+        "SPARQL_CACHE_ENABLED": "true",
+        "SPARQL_CACHE_TTL": "300",
+        "SPARQL_CACHE_MAX_SIZE": "100",
+        "SPARQL_CACHE_STRATEGY": "lru",
+        "PYTHONPATH": "/path/to/project/directory"
+      },
+      "transport": "stdio"
+    }
+  ],
+  "defaultServer": "sparql"
+}
