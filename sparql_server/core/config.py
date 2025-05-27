@@ -52,7 +52,7 @@ class SPARQLConfig(BaseModel):
     # HTTP server configuration (when using http transport)
     http_host: str = "localhost"
     http_port: int = Field(default=8000, ge=1, le=65535)
-    transport: str = Field(default="stdio", pattern="^(stdio|http)$")
+    transport: str = Field(default="stdio", pattern="^(stdio|streamable-http|sse)$")
     
     @classmethod
     def from_env(cls) -> "SPARQLConfig":

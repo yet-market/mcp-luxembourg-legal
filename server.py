@@ -62,9 +62,9 @@ def parse_args() -> argparse.Namespace:
     transport_group.add_argument(
         "--transport",
         type=str,
-        choices=["stdio", "http"],
+        choices=["stdio", "streamable-http", "sse"],
         default=os.environ.get("MCP_TRANSPORT", "stdio"),
-        help="Transport type (stdio or http, default: stdio)"
+        help="Transport type (stdio, streamable-http, or sse, default: stdio)"
     )
     transport_group.add_argument(
         "--host",
@@ -281,9 +281,12 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     logger.info(f"Server is ready to receive queries via {transport} transport")
     
     # Run the MCP server with the specified transport
-    if transport == "http":
-        logger.info(f"Starting HTTP server on {host}:{port}")
-        mcp.run(transport="http", host=host, port=port)
+    if transport == "streamable-http":
+        logger.info(f"Starting streamable HTTP server on {host}:{port}")
+        mcp.run(transport="streamable-http", host=host, port=port, path="/mcp")
+    elif transport == "sse":
+        logger.info(f"Starting SSE server on {host}:{port}")
+        mcp.run(transport="sse", host=host, port=port)
     else:
         logger.info("Starting stdio transport")
         mcp.run(transport="stdio")
