@@ -173,11 +173,8 @@ Type=simple
 User=$SERVICE_USER
 Group=$SERVICE_USER
 WorkingDirectory=$INSTALL_DIR
-Environment=MCP_TRANSPORT=streamable-http
-Environment=MCP_HOST=localhost
-Environment=MCP_PORT=8000
 EnvironmentFile=/etc/mcp-sparql/env
-ExecStart=$INSTALL_DIR/venv/bin/python server.py
+ExecStart=$INSTALL_DIR/venv/bin/python server.py --transport streamable-http --host localhost --port 8000
 ExecReload=/bin/kill -s HUP \$MAINPID
 Restart=always
 RestartSec=3
