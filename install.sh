@@ -201,37 +201,228 @@ EOF
     # Reload systemd
     systemctl daemon-reload
     
+    # Create management scripts
+    print_status "Creating management scripts..."
+    
+    # Create start script
+    cat > "$INSTALL_DIR/start.sh" <<'EOF'
+#!/bin/bash
+# Start MCP SPARQL Server services
+
+set -e
+
+print_status() {
+    echo -e "\033[0;32m[INFO]\033[0m $1"
+}
+
+if [ "$1" = "stdio" ]; then
+    print_status "Starting stdio service..."
+    sudo systemctl start mcp-sparql
+    sudo systemctl enable mcp-sparql
+    echo "✅ stdio service started"
+elif [ "$1" = "http" ]; then
+    print_status "Starting HTTP service..."
+    sudo systemctl start mcp-sparql-http
+    sudo systemctl enable mcp-sparql-http
+    echo "✅ HTTP service started at http://localhost:8000/mcp/"
+else
+    print_status "Starting HTTP service (default)..."
+    sudo systemctl start mcp-sparql-http
+    sudo systemctl enable mcp-sparql-http
+    echo "✅ HTTP service started at http://localhost:8000/mcp/"
+    echo "Use './start.sh stdio' to start stdio service instead"
+fi
+EOF
+
+    # Create stop script
+    cat > "$INSTALL_DIR/stop.sh" <<'EOF'
+#!/bin/bash
+# Stop MCP SPARQL Server services
+
+set -e
+
+print_status() {
+    echo -e "\033[0;32m[INFO]\033[0m $1"
+}
+
+if [ "$1" = "stdio" ]; then
+    print_status "Stopping stdio service..."
+    sudo systemctl stop mcp-sparql
+    echo "✅ stdio service stopped"
+elif [ "$1" = "http" ]; then
+    print_status "Stopping HTTP service..."
+    sudo systemctl stop mcp-sparql-http
+    echo "✅ HTTP service stopped"
+else
+    print_status "Stopping all services..."
+    sudo systemctl stop mcp-sparql-http 2>/dev/null || true
+    sudo systemctl stop mcp-sparql 2>/dev/null || true
+    echo "✅ All services stopped"
+fi
+EOF
+
+    # Create status script
+    cat > "$INSTALL_DIR/status.sh" <<'EOF'
+#!/bin/bash
+# Check MCP SPARQL Server service status
+
+echo "=== MCP SPARQL Server Status ==="
+echo
+
+echo "📋 Available Services:"
+echo "  - mcp-sparql.service      (stdio transport)"
+echo "  - mcp-sparql-http.service (HTTP transport)"
+echo
+
+echo "🔍 Service Status:"
+for service in mcp-sparql mcp-sparql-http; do
+    if sudo systemctl is-active --quiet $service; then
+        status="✅ RUNNING"
+    else
+        status="❌ STOPPED"
+    fi
+    echo "  $service: $status"
+done
+
+echo
+
+if sudo systemctl is-active --quiet mcp-sparql-http; then
+    echo "🌐 HTTP Service Details:"
+    sudo systemctl status mcp-sparql-http --no-pager -l | head -10
+    echo
+    echo "📍 MCP Endpoint: http://localhost:8000/mcp/"
+fi
+
+echo "📊 Quick Commands:"
+echo "  ./start.sh [stdio|http]  - Start service"
+echo "  ./stop.sh [stdio|http]   - Stop service"
+echo "  ./logs.sh [stdio|http]   - View logs"
+echo "  sudo systemctl restart mcp-sparql-http"
+EOF
+
+    # Create logs script
+    cat > "$INSTALL_DIR/logs.sh" <<'EOF'
+#!/bin/bash
+# View MCP SPARQL Server logs
+
+if [ "$1" = "stdio" ]; then
+    echo "📜 Viewing stdio service logs (Ctrl+C to exit):"
+    sudo journalctl -u mcp-sparql -f
+elif [ "$1" = "http" ]; then
+    echo "📜 Viewing HTTP service logs (Ctrl+C to exit):"
+    sudo journalctl -u mcp-sparql-http -f
+else
+    echo "📜 Viewing HTTP service logs (Ctrl+C to exit):"
+    echo "Use './logs.sh stdio' for stdio service logs"
+    echo
+    sudo journalctl -u mcp-sparql-http -f
+fi
+EOF
+
+    # Make scripts executable
+    chmod +x "$INSTALL_DIR/start.sh"
+    chmod +x "$INSTALL_DIR/stop.sh"
+    chmod +x "$INSTALL_DIR/status.sh"
+    chmod +x "$INSTALL_DIR/logs.sh"
+    
     print_status "Systemd services installed successfully!"
+    
+    # Stop any running services before starting
+    print_status "Stopping existing services..."
+    systemctl stop mcp-sparql 2>/dev/null || true
+    systemctl stop mcp-sparql-http 2>/dev/null || true
+    
+    # Start and enable the HTTP service (most common for nginx integration)
+    print_status "Starting MCP SPARQL HTTP service..."
+    systemctl start mcp-sparql-http
+    systemctl enable mcp-sparql-http
+    
+    # Wait a moment for service to start
+    sleep 2
+    
+    # Check service status
+    if systemctl is-active --quiet mcp-sparql-http; then
+        print_status "✅ HTTP service started successfully!"
+        echo
+        echo "🌐 MCP Server is running at: http://localhost:8000/mcp/"
+        echo
+        print_status "Service status:"
+        systemctl status mcp-sparql-http --no-pager -l
+    else
+        print_error "❌ HTTP service failed to start!"
+        echo "Check logs with: journalctl -u mcp-sparql-http -f"
+        exit 1
+    fi
+    
     echo
-    echo "Available services:"
+    echo "📋 Available services:"
     echo "  - mcp-sparql.service      (stdio transport)"
-    echo "  - mcp-sparql-http.service (HTTP transport for nginx)"
+    echo "  - mcp-sparql-http.service (HTTP transport for nginx) ✅ RUNNING"
     echo
-    echo "Configuration:"
-    echo "  1. Edit configuration in /etc/mcp-sparql/env"
-    echo "  2. Set your SPARQL_ENDPOINT"
+    echo "🔧 Configuration:"
+    echo "  Edit: /etc/mcp-sparql/env"
     echo
-    echo "For stdio transport:"
-    echo "  systemctl start mcp-sparql"
-    echo "  systemctl enable mcp-sparql"
+    echo "📜 Management scripts created:"
+    echo "  ./start.sh    - Start services"
+    echo "  ./stop.sh     - Stop services" 
+    echo "  ./status.sh   - Check service status"
+    echo "  ./logs.sh     - View logs"
     echo
-    echo "For HTTP transport (nginx integration):"
-    echo "  systemctl start mcp-sparql-http"
-    echo "  systemctl enable mcp-sparql-http"
-    echo
-    echo "Check logs:"
-    echo "  journalctl -u mcp-sparql -f"
-    echo "  journalctl -u mcp-sparql-http -f"
+    echo "📊 Quick commands:"
+    echo "  journalctl -u mcp-sparql-http -f     # View HTTP service logs"
+    echo "  systemctl restart mcp-sparql-http    # Restart HTTP service"
     
 else
+    print_status "Creating local management scripts..."
+    
+    # Create local start script
+    cat > start.sh <<'EOF'
+#!/bin/bash
+# Start MCP SPARQL Server locally
+
+set -e
+
+if [ ! -f "venv/bin/activate" ]; then
+    echo "❌ Virtual environment not found. Run ./install.sh first."
+    exit 1
+fi
+
+source venv/bin/activate
+
+if [ -z "$SPARQL_ENDPOINT" ]; then
+    echo "⚠️  SPARQL_ENDPOINT not set. Using default endpoint."
+    export SPARQL_ENDPOINT="https://dbpedia.org/sparql"
+fi
+
+if [ "$1" = "stdio" ]; then
+    echo "🚀 Starting stdio server..."
+    python server.py --endpoint "$SPARQL_ENDPOINT"
+elif [ "$1" = "http" ]; then
+    echo "🚀 Starting HTTP server..."
+    python server.py --transport streamable-http --host localhost --port 8000 --endpoint "$SPARQL_ENDPOINT"
+else
+    echo "🚀 Starting HTTP server (default)..."
+    echo "🌐 Server will be available at: http://localhost:8000/mcp/"
+    echo "Use './start.sh stdio' for stdio mode"
+    python server.py --transport streamable-http --host localhost --port 8000 --endpoint "$SPARQL_ENDPOINT"
+fi
+EOF
+
+    chmod +x start.sh
+    
     print_status "Local installation complete!"
     echo
-    echo "To run the server:"
+    echo "📜 Management script created:"
+    echo "  ./start.sh [stdio|http]  - Start server locally"
+    echo
+    echo "🚀 Quick start:"
+    echo "  export SPARQL_ENDPOINT=https://your-endpoint.com/sparql"
+    echo "  ./start.sh http    # Start HTTP server"
+    echo "  ./start.sh stdio   # Start stdio server"
+    echo
+    echo "📝 Manual commands:"
     echo "  source venv/bin/activate"
     echo "  python server.py --endpoint YOUR_SPARQL_ENDPOINT"
-    echo
-    echo "For HTTP mode:"
-    echo "  python server.py --transport streamable-http --host localhost --port 8000 --endpoint YOUR_SPARQL_ENDPOINT"
 fi
 
 print_status "Installation completed successfully!"

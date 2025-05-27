@@ -78,6 +78,31 @@ cd yet-sparql-mcp-server
 sudo ./install.sh
 ```
 
+The installer automatically:
+- Sets up virtual environment and dependencies
+- Creates and starts systemd services
+- Provides management scripts for easy control
+- Configures the HTTP service for nginx integration
+
+### Quick Management
+
+After installation, use the provided scripts:
+
+```bash
+# Check status
+./status.sh
+
+# Start/stop services
+./start.sh [stdio|http]    # Start service (http is default)
+./stop.sh [stdio|http]     # Stop service
+./logs.sh [stdio|http]     # View logs
+
+# Examples
+./start.sh http            # Start HTTP service for nginx
+./logs.sh http             # View HTTP service logs
+./stop.sh                  # Stop all services
+```
+
 ## 🔍 Usage
 
 ### Basic Usage (stdio transport)
