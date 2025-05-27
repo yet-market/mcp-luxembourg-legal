@@ -5,13 +5,13 @@
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Python: 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-*A flexible and powerful SPARQL-enabled server for MCP (Message Carrying Protocol)*
+*A flexible and powerful SPARQL-enabled server for MCP (Model Context Protocol)*
 
 </div>
 
 ## 🌟 Overview
 
-MCP SPARQL Server is a high-performance, configurable server that connects to any SPARQL endpoint and provides enhanced functionality including result formatting and caching. It's built on top of the MCP (Message Carrying Protocol) framework to provide a seamless, language-agnostic interface for querying semantic data.
+MCP SPARQL Server is a high-performance, configurable server that connects to any SPARQL endpoint and provides enhanced functionality including result formatting and caching. It's built on top of the FastMCP framework implementing the Model Context Protocol (MCP) to provide a seamless interface for AI assistants to query semantic data.
 
 ## ✨ Features
 
@@ -38,7 +38,7 @@ MCP SPARQL Server is a high-performance, configurable server that connects to an
 
 - Python 3.8 or newer
 - `SPARQLWrapper` library
-- `mcp` framework
+- `fastmcp` framework
 - `pydantic` for configuration
 - `python-daemon` for background execution
 
@@ -48,8 +48,11 @@ MCP SPARQL Server is a high-performance, configurable server that connects to an
 
 ```bash
 # Clone the repository
-git clone https://github.com/yet-ai/mcp-server-sparql.git
-cd mcp-server-sparql
+git clone https://github.com/yet-market/yet-sparql-mcp-server.git
+cd yet-sparql-mcp-server
+
+# Install dependencies
+pip install -r requirements.txt
 
 # Install the package
 pip install -e .
@@ -67,8 +70,8 @@ For a full installation with systemd service setup:
 
 ```bash
 # Download the repository
-git clone https://github.com/yet-ai/mcp-server-sparql.git
-cd mcp-server-sparql
+git clone https://github.com/yet-market/yet-sparql-mcp-server.git
+cd yet-sparql-mcp-server
 
 # Run the installation script (as root for systemd service)
 sudo ./install.sh
@@ -81,7 +84,7 @@ sudo ./install.sh
 Start the server by specifying a SPARQL endpoint:
 
 ```bash
-mcp-server-sparql --endpoint https://dbpedia.org/sparql
+python server.py --endpoint https://dbpedia.org/sparql
 ```
 
 ### Running as a Daemon
@@ -89,7 +92,7 @@ mcp-server-sparql --endpoint https://dbpedia.org/sparql
 To run the server as a background process:
 
 ```bash
-mcp-server-sparql --endpoint https://dbpedia.org/sparql --daemon \
+python server.py --endpoint https://dbpedia.org/sparql --daemon \
   --log-file /var/log/mcp-sparql.log \
   --pid-file /var/run/mcp-sparql.pid
 ```
@@ -115,37 +118,57 @@ If installed with systemd support:
 
 ### Client Query Examples
 
-After starting the server, you can query it using the MCP client:
+After starting the server, you can use it with any MCP-compatible client or through the FastMCP client:
 
-#### Basic Query
+#### Using FastMCP Client (Python)
 
-```bash
-echo '{"query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5"}' | mcp claude
+```python
+import asyncio
+from fastmcp.client import Client, PythonStdioTransport
+
+async def query_server():
+    # Connect to the server
+    transport = PythonStdioTransport(
+        script_path="server.py",
+        args=["--endpoint", "https://dbpedia.org/sparql"]
+    )
+    
+    async with Client(transport) as client:
+        # Execute a SPARQL query
+        result = await client.call_tool("query", {
+            "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
+            "format": "simplified"
+        })
+        
+        print(result[0].text)
+
+asyncio.run(query_server())
 ```
 
-#### Query with Specific Format
+#### Query with Different Formats
 
-```bash
-echo '{"query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5", "format": "tabular"}' | mcp claude
-```
+```python
+# JSON format (default)
+result = await client.call_tool("query", {
+    "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
+    "format": "json"
+})
 
-#### Complex Query Example
-
-```bash
-echo '{
-  "query_string": "PREFIX foaf: <http://xmlns.com/foaf/0.1/> SELECT ?name ?email WHERE { ?person foaf:name ?name . OPTIONAL { ?person foaf:mbox ?email } } LIMIT 5",
-  "format": "simplified"
-}' | mcp claude
+# Tabular format
+result = await client.call_tool("query", {
+    "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
+    "format": "tabular"
+})
 ```
 
 #### Cache Management
 
-```bash
+```python
 # Get cache statistics
-echo '{"action": "stats"}' | mcp cache
+cache_stats = await client.call_tool("cache", {"action": "stats"})
 
 # Clear the cache
-echo '{"action": "clear"}' | mcp cache
+cache_clear = await client.call_tool("cache", {"action": "clear"})
 ```
 
 ## ⚙️ Configuration
@@ -488,7 +511,7 @@ mcp-server-sparql/
 ### Running Tests
 
 ```bash
-python test_server.py
+python test_sparql_server.py
 ```
 
 ## 🔒 Security Considerations

@@ -11,7 +11,7 @@ with open('README.md', 'r', encoding='utf-8') as f:
 
 setup(
     name="mcp-server-sparql",
-    version="0.2.0",
+    version="1.0.0",
     description="SPARQL-enabled MCP server with caching and result formatting",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -22,7 +22,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         "SPARQLWrapper>=2.0.0",
-        "mcp>=1.9.0",
+        "fastmcp>=2.0.0",
         "pydantic>=2.0.0",
         "python-daemon>=2.3.0",
     ],
