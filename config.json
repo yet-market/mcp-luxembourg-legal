@@ -4,7 +4,7 @@
       "name": "sparql",
       "command": "python3",
       "args": [
-        "/path/to/server.py",
+        "/Users/sidalitemkit/work/Workspace/yet/yet.ai/mcp/server.py",
         "--endpoint",
         "https://data.legilux.public.lu/sparqlendpoint",
         "--format",
@@ -24,7 +24,7 @@
         "SPARQL_CACHE_TTL": "300",
         "SPARQL_CACHE_MAX_SIZE": "100",
         "SPARQL_CACHE_STRATEGY": "lru",
-        "PYTHONPATH": "/path/to/project/directory"
+        "PYTHONPATH": "/Users/sidalitemkit/work/Workspace/yet/yet.ai/mcp"
       },
       "transport": "stdio"
     }
