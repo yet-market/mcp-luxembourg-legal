@@ -101,8 +101,17 @@ source venv/bin/activate && python server.py --transport http --host localhost -
 
 ### AI Tool Design
 - `search_luxembourg_documents`: Keyword-based legal document search with full content extraction
+  - **IMPORTANT**: Use FRENCH keywords (e.g., "taxe" not "tax", "environnement" not "environmental")
+  - **Examples**: "taxe", "société", "règlement", "environnement", "fiscal"
 - `query`: Direct SPARQL query execution with result formatting
 - `cache`: Cache management for improved performance
+
+### Common French Legal Keywords for AI
+**Tax & Finance**: taxe, impôt, fiscal, TVA, redevance
+**Environment**: environnement, écologie, pollution, déchets, protection
+**Business**: société, entreprise, commercial, SARL, SA
+**Legal Documents**: loi, règlement, arrêté, décret, ordonnance
+**Administrative**: administration, public, municipal, communal
 
 ## Content Extraction Strategy
 

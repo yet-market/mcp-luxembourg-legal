@@ -276,7 +276,7 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     
     # Luxembourg Legal Intelligence Tools
     
-    @mcp.tool(description="Search Luxembourg legal documents with full content extraction")
+    @mcp.tool(description="Search Luxembourg legal documents with full content extraction. IMPORTANT: Use FRENCH keywords (Luxembourg documents are in French). Examples: 'taxe' not 'tax', 'environnement' not 'environmental', 'société' not 'company'.")
     def search_luxembourg_documents(
         keywords: str,
         limit: int = 10,
@@ -284,13 +284,21 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     ) -> Dict[str, Any]:
         """Search Luxembourg legal documents and extract full content.
         
+        IMPORTANT: Luxembourg legal documents are in FRENCH. Use French keywords for best results.
+        
         Args:
-            keywords: Search keywords (e.g., 'environmental protection', 'tax law')
+            keywords: Search keywords in FRENCH (e.g., 'taxe', 'environnement', 'société', 'règlement')
             limit: Maximum number of results (default: 10)
             include_content: Whether to extract full document content (default: true)
             
         Returns:
             List of documents with metadata and full content
+            
+        Examples:
+            - Tax laws: use "taxe" or "impôt" or "fiscal"
+            - Environmental: use "environnement" or "écologie" 
+            - Companies: use "société" or "entreprise"
+            - Regulations: use "règlement" or "arrêté"
         """
         logger.info(f"Searching Luxembourg documents for: {keywords}")
         
