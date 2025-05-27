@@ -743,7 +743,7 @@ This project is licensed under a dual-license model:
 
 See the [LICENSE](LICENSE) file for complete details.
 
-This software was imagined and developed by Temkit Sid-Ali for Yet.lu.
+This software was imagined and developed by Temkit Sid-Ali for Yet.lu with AI assistance from Claude (Anthropic), GitHub Copilot/Codex (OpenAI), and GPT-o3 (OpenAI).
 
 ## 🚀 Roadmap
 
@@ -781,6 +781,10 @@ Special thanks to:
 - **Anthropic** for their work on AI assistants and the MCP ecosystem
 - The **semantic web** and **RDF** communities for their foundational work
 - **W3C** for the SPARQL specification and standards
+- **AI Development Partners**:
+  - **Claude (Anthropic)** - Primary development assistant for architecture, code implementation, and documentation
+  - **GitHub Copilot/Codex (OpenAI)** - Code completion and development acceleration
+  - **GPT-o3 (OpenAI)** - Advanced reasoning and problem-solving assistance
 
 ## 📬 Contact
 
@@ -793,6 +797,8 @@ Special thanks to:
 
 <div align="center">
   <sub>Built with ❤️ by Temkit Sid-Ali for <a href="https://yet.lu">Yet.lu</a></sub>
+  <br>
+  <sub>Co-developed with Claude (Anthropic), GitHub Copilot/Codex & GPT-o3 (OpenAI)</sub>
   <br>
   <sub>© 2025 <a href="https://yet.lu">Yet.lu</a> - All rights reserved</sub>
 </div>

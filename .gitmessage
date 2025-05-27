@@ -1,0 +1,13 @@
+# Commit message template
+# 
+# Format: <type>: <description>
+#
+# AI Co-authorship options:
+# 🤖 Co-developed with Claude (Anthropic)
+# 🤖 Co-developed with GitHub Copilot/Codex (OpenAI) 
+# 🤖 Co-developed with GPT-o3 (OpenAI)
+# 🤖 Co-developed with AI assistance
+#
+# Co-Authored-By: Claude <noreply@anthropic.com>
+# Co-Authored-By: GitHub Copilot <noreply@github.com>
+# Co-Authored-By: GPT-o3 <noreply@openai.com>

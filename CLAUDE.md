@@ -1,6 +1,19 @@
-# MCP SPARQL Server - Claude Development Guide
+# MCP SPARQL Server - AI Development Guide
 
-This file contains information for Claude Code AI assistant to understand the project structure and development practices.
+This file contains information for AI assistants (Claude, Copilot, GPT-o3) to understand the project structure and development practices.
+
+## 🤖 AI Co-Development
+
+This project is co-developed with multiple AI systems:
+- **Claude (Anthropic)**: Primary architecture, implementation, testing, and documentation
+- **GitHub Copilot/Codex (OpenAI)**: Code completion and development acceleration
+- **GPT-o3 (OpenAI)**: Advanced reasoning and complex problem-solving
+
+## Development Philosophy
+
+- **Human-AI Collaboration**: Leveraging AI for rapid development while maintaining human oversight
+- **Quality First**: AI assistance enhances but doesn't replace code review and testing
+- **Transparency**: Clear attribution of AI contributions in commits and documentation
 
 ## Project Overview
 

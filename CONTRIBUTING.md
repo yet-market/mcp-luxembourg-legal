@@ -2,6 +2,15 @@
 
 Thank you for your interest in contributing to the MCP SPARQL Server! This document provides guidelines and information for contributors.
 
+## 🤖 AI-Assisted Development
+
+This project embraces AI-assisted development. The codebase has been co-developed with:
+- **Claude (Anthropic)** - Primary architecture and implementation
+- **GitHub Copilot/Codex (OpenAI)** - Code completion and acceleration  
+- **GPT-o3 (OpenAI)** - Advanced problem-solving and optimization
+
+Contributors are encouraged to use AI tools responsibly to enhance their contributions while maintaining code quality and understanding.
+
 ## 🤝 How to Contribute
 
 ### Reporting Issues
