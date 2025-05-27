@@ -531,6 +531,16 @@ See the [LICENSE](LICENSE) file for complete details.
 
 This software was imagined and developed by Temkit Sid-Ali for Yet.lu.
 
+## 🚀 Roadmap
+
+We have exciting plans for the future! Check out our [detailed roadmap](ROADMAP.md) to see what's coming next, including:
+
+- 🔒 Enhanced security and authentication
+- 🌐 Web interface for query exploration
+- 🤖 AI-powered natural language to SPARQL conversion
+- 📊 Advanced data visualization and analytics
+- 🏢 Enterprise features and scalability improvements
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
@@ -540,6 +550,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 3. Commit your changes (`git commit -m 'Add some amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
+
+See our [Contributing Guide](CONTRIBUTING.md) for detailed development setup and guidelines.
 
 ## 🙏 Acknowledgments
 
