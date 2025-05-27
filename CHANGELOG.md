@@ -8,12 +8,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **HTTP Transport Support**: Added HTTP server functionality alongside existing stdio transport
+- Command-line options for transport selection (`--transport`, `--host`, `--port`)
+- Environment variable support for HTTP configuration (`MCP_TRANSPORT`, `MCP_HOST`, `MCP_PORT`)
+- Nginx reverse proxy compatibility for production deployments
 - FastMCP framework integration for MCP server implementation
 - Comprehensive test suite using FastMCP client
 - Support for both in-memory and stdio transport testing
 - Useful links section in GUIDELINES.md with FastMCP documentation
 
 ### Changed
+- Enhanced `SPARQLConfig` to include HTTP server settings (host, port, transport)
+- Modified `run_server()` function to support both stdio and HTTP transports
+- Updated command-line argument parser with transport configuration group
 - Updated imports to use `fastmcp` instead of `mcp.server.fastmcp`
 - Improved test file structure with proper FastMCP client usage
 - Enhanced requirements.txt with all necessary dependencies
@@ -23,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Outdated MCP client implementations
 
 ### Fixed
+- Pydantic validation error: replaced deprecated `regex` parameter with `pattern`
 - Import errors in server.py and test files
 - FastMCP client integration and response parsing
 - Dependencies in requirements.txt

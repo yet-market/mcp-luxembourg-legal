@@ -26,9 +26,10 @@ MCP SPARQL Server is a high-performance, configurable server that connects to an
   - Configurable TTL (time-to-live)
   - Cache management tools
 - **Flexible Deployment Options**:
-  - Run in foreground mode
+  - Run in foreground mode with stdio or HTTP transport
   - Run as a background daemon
   - Deploy as a systemd service
+  - HTTP server mode for nginx reverse proxy integration
 - **Comprehensive Configuration**:
   - Command-line arguments
   - Environment variables
@@ -79,7 +80,7 @@ sudo ./install.sh
 
 ## 🔍 Usage
 
-### Basic Usage
+### Basic Usage (stdio transport)
 
 Start the server by specifying a SPARQL endpoint:
 
@@ -87,12 +88,40 @@ Start the server by specifying a SPARQL endpoint:
 python server.py --endpoint https://dbpedia.org/sparql
 ```
 
+### HTTP Server Mode (for nginx/web integration)
+
+Run the server as an HTTP server:
+
+```bash
+# Basic HTTP server
+python server.py --transport http --endpoint https://dbpedia.org/sparql
+
+# Custom host and port
+python server.py --transport http --host 0.0.0.0 --port 8080 --endpoint https://dbpedia.org/sparql
+
+# Using environment variables
+export MCP_TRANSPORT=http
+export MCP_HOST=0.0.0.0
+export MCP_PORT=8000
+export SPARQL_ENDPOINT=https://dbpedia.org/sparql
+python server.py
+```
+
 ### Running as a Daemon
 
-To run the server as a background process:
+To run the server as a background process (stdio transport):
 
 ```bash
 python server.py --endpoint https://dbpedia.org/sparql --daemon \
+  --log-file /var/log/mcp-sparql.log \
+  --pid-file /var/run/mcp-sparql.pid
+```
+
+To run the HTTP server as a daemon:
+
+```bash
+python server.py --transport http --host 0.0.0.0 --port 8000 \
+  --endpoint https://dbpedia.org/sparql --daemon \
   --log-file /var/log/mcp-sparql.log \
   --pid-file /var/run/mcp-sparql.pid
 ```
@@ -120,7 +149,7 @@ If installed with systemd support:
 
 After starting the server, you can use it with any MCP-compatible client or through the FastMCP client:
 
-#### Using FastMCP Client (Python)
+#### Using FastMCP Client with stdio transport (Python)
 
 ```python
 import asyncio
@@ -132,6 +161,28 @@ async def query_server():
         script_path="server.py",
         args=["--endpoint", "https://dbpedia.org/sparql"]
     )
+    
+    async with Client(transport) as client:
+        # Execute a SPARQL query
+        result = await client.call_tool("query", {
+            "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
+            "format": "simplified"
+        })
+        
+        print(result[0].text)
+
+asyncio.run(query_server())
+```
+
+#### Using FastMCP Client with HTTP transport (Python)
+
+```python
+import asyncio
+from fastmcp.client import Client, HttpTransport
+
+async def query_server():
+    # Connect to HTTP server
+    transport = HttpTransport("http://localhost:8000")
     
     async with Client(transport) as client:
         # Execute a SPARQL query
@@ -244,6 +295,21 @@ cache_clear = await client.call_tool("cache", {"action": "clear"})
     <td>PID file location when running as a daemon</td>
     <td>/var/run/mcp-sparql-server.pid</td>
   </tr>
+  <tr>
+    <td><code>--transport TRANSPORT</code></td>
+    <td>Transport type (stdio or http)</td>
+    <td>stdio</td>
+  </tr>
+  <tr>
+    <td><code>--host HOST</code></td>
+    <td>Host to bind HTTP server to</td>
+    <td>localhost</td>
+  </tr>
+  <tr>
+    <td><code>--port PORT</code></td>
+    <td>Port to bind HTTP server to</td>
+    <td>8000</td>
+  </tr>
 </tbody>
 </table>
 
@@ -303,8 +369,98 @@ cache_clear = await client.call_tool("cache", {"action": "clear"})
     <td>Include query metadata in results</td>
     <td>true</td>
   </tr>
+  <tr>
+    <td><code>MCP_TRANSPORT</code></td>
+    <td>Transport type (stdio or http)</td>
+    <td>stdio</td>
+  </tr>
+  <tr>
+    <td><code>MCP_HOST</code></td>
+    <td>Host to bind HTTP server to</td>
+    <td>localhost</td>
+  </tr>
+  <tr>
+    <td><code>MCP_PORT</code></td>
+    <td>Port to bind HTTP server to</td>
+    <td>8000</td>
+  </tr>
 </tbody>
 </table>
+
+## 🌐 Nginx Integration
+
+When using HTTP transport, you can integrate the server with nginx as a reverse proxy:
+
+### 1. Start the server in HTTP mode
+
+```bash
+python server.py --transport http --host localhost --port 8000 --endpoint https://your-sparql-endpoint.com/sparql
+```
+
+### 2. Configure nginx
+
+Add this configuration to your nginx server block:
+
+```nginx
+upstream mcp_sparql {
+    server localhost:8000;
+    # Add more servers for load balancing if needed
+    # server localhost:8001;
+    # server localhost:8002;
+}
+
+server {
+    listen 80;
+    server_name your-domain.com;
+
+    location /api/sparql {
+        proxy_pass http://mcp_sparql;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Optional: Add CORS headers
+        add_header Access-Control-Allow-Origin *;
+        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization";
+    }
+}
+```
+
+### 3. Production deployment with systemd
+
+Create a systemd service for HTTP mode:
+
+```ini
+# /etc/systemd/system/mcp-sparql-http.service
+[Unit]
+Description=MCP SPARQL Server (HTTP)
+After=network.target
+
+[Service]
+Type=simple
+User=mcp-sparql
+Group=mcp-sparql
+WorkingDirectory=/opt/mcp-sparql
+Environment=MCP_TRANSPORT=http
+Environment=MCP_HOST=localhost
+Environment=MCP_PORT=8000
+Environment=SPARQL_ENDPOINT=https://your-sparql-endpoint.com/sparql
+ExecStart=/opt/mcp-sparql/venv/bin/python server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start the service:
+
+```bash
+sudo systemctl enable mcp-sparql-http
+sudo systemctl start mcp-sparql-http
+```
 
 ## 📊 Result Formats
 
@@ -511,7 +667,14 @@ mcp-server-sparql/
 ### Running Tests
 
 ```bash
+# Test stdio transport
 python test_sparql_server.py
+
+# Test HTTP transport (start server first)
+# Terminal 1:
+python server.py --transport http --endpoint https://dbpedia.org/sparql
+# Terminal 2:
+# Run HTTP-specific tests (if available)
 ```
 
 ## 🔒 Security Considerations

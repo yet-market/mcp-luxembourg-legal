@@ -57,6 +57,28 @@ def parse_args() -> argparse.Namespace:
         help="File to store logs when running as a daemon"
     )
     
+    # Transport configuration
+    transport_group = parser.add_argument_group("Transport Configuration")
+    transport_group.add_argument(
+        "--transport",
+        type=str,
+        choices=["stdio", "http"],
+        default=os.environ.get("MCP_TRANSPORT", "stdio"),
+        help="Transport type (stdio or http, default: stdio)"
+    )
+    transport_group.add_argument(
+        "--host",
+        type=str,
+        default=os.environ.get("MCP_HOST", "localhost"),
+        help="Host to bind HTTP server to (default: localhost)"
+    )
+    transport_group.add_argument(
+        "--port",
+        type=int,
+        default=int(os.environ.get("MCP_PORT", "8000")),
+        help="Port to bind HTTP server to (default: 8000)"
+    )
+    
     # SPARQL endpoint configuration
     endpoint_group = parser.add_argument_group("SPARQL Endpoint")
     endpoint_group.add_argument(
@@ -156,11 +178,14 @@ def create_config_from_args(args: argparse.Namespace) -> SPARQLConfig:
     )
 
 
-def run_server(config: SPARQLConfig) -> None:
+def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "localhost", port: int = 8000) -> None:
     """Run the MCP SPARQL Server with the given configuration.
     
     Args:
         config: The server configuration.
+        transport: Transport type (stdio or http).
+        host: Host to bind HTTP server to (only used for http transport).
+        port: Port to bind HTTP server to (only used for http transport).
     """
     logger.info(f"Starting MCP SPARQL Server with endpoint: {config.endpoint_url}")
     
@@ -253,10 +278,15 @@ def run_server(config: SPARQLConfig) -> None:
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    logger.info("Server is ready to receive queries")
+    logger.info(f"Server is ready to receive queries via {transport} transport")
     
-    # Run the MCP server
-    mcp.run(transport="stdio")
+    # Run the MCP server with the specified transport
+    if transport == "http":
+        logger.info(f"Starting HTTP server on {host}:{port}")
+        mcp.run(transport="http", host=host, port=port)
+    else:
+        logger.info("Starting stdio transport")
+        mcp.run(transport="stdio")
 
 
 def main() -> None:
@@ -320,10 +350,10 @@ def main() -> None:
                 f.write(str(os.getpid()))
                 
             # Run the server
-            run_server(config)
+            run_server(config, args.transport, args.host, args.port)
     else:
         # Run in foreground mode
-        run_server(config)
+        run_server(config, args.transport, args.host, args.port)
 
 
 if __name__ == "__main__":

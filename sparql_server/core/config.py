@@ -49,6 +49,11 @@ class SPARQLConfig(BaseModel):
     pretty_print: bool = False
     include_metadata: bool = True
     
+    # HTTP server configuration (when using http transport)
+    http_host: str = "localhost"
+    http_port: int = Field(default=8000, ge=1, le=65535)
+    transport: str = Field(default="stdio", pattern="^(stdio|http)$")
+    
     @classmethod
     def from_env(cls) -> "SPARQLConfig":
         """Create a configuration instance from environment variables.
@@ -80,6 +85,9 @@ class SPARQLConfig(BaseModel):
             ),
             pretty_print=os.environ.get("SPARQL_PRETTY_PRINT", "false").lower() == "true",
             include_metadata=os.environ.get("SPARQL_INCLUDE_METADATA", "true").lower() == "true",
+            http_host=os.environ.get("MCP_HOST", "localhost"),
+            http_port=int(os.environ.get("MCP_PORT", "8000")),
+            transport=os.environ.get("MCP_TRANSPORT", "stdio"),
         )
     
     @validator("endpoint_url")
