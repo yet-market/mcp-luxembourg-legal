@@ -1,47 +1,42 @@
-# MCP SPARQL Server
+# MCP Luxembourg Legal Intelligence Server
 
 <div align="center">
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![Python: 3.8+](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
 
-*A flexible and powerful SPARQL-enabled server for MCP (Model Context Protocol)*
+*AI-powered legal document intelligence server for Luxembourg government data*
 
 </div>
 
 ## 🌟 Overview
 
-MCP SPARQL Server is a high-performance, configurable server that connects to any SPARQL endpoint and provides enhanced functionality including result formatting and caching. It's built on top of the FastMCP framework implementing the Model Context Protocol (MCP) to provide a seamless interface for AI assistants to query semantic data.
+MCP Luxembourg Legal Intelligence Server is a specialized MCP (Model Context Protocol) server that transforms raw Luxembourg government data into AI-digestible legal intelligence. Built specifically for accessing and processing Luxembourg's legal documents, company registries, and administrative data through intelligent content extraction and semantic processing.
 
-## ✨ Features
+## ✨ Key Features
 
-- **Universal Endpoint Support**: Connect to any SPARQL-compliant endpoint
-- **Full SPARQL Support**: Execute any valid SPARQL query (SELECT, ASK, CONSTRUCT, DESCRIBE)
-- **Intelligent Result Formatting**:
-  - Standard JSON (compatible with standard SPARQL clients)
-  - Simplified JSON (easier to work with in applications)
-  - Tabular format (ready for display in UI tables)
-- **High-Performance Caching**:
-  - Multiple cache strategies (LRU, LFU, FIFO)
-  - Configurable TTL (time-to-live)
-  - Cache management tools
-- **Flexible Deployment Options**:
-  - Run in foreground mode with stdio or HTTP transport
-  - Run as a background daemon
-  - Deploy as a systemd service
-  - HTTP server mode for nginx reverse proxy integration
-- **Comprehensive Configuration**:
-  - Command-line arguments
-  - Environment variables
-  - No hardcoded values
+- **🇱🇺 Luxembourg Legal Focus**: Specialized tools for Luxembourg legal system
+- **📄 Smart Document Processing**: Automatic HTML and PDF content extraction
+- **🧠 AI-Ready Content**: Transforms raw government data into meaningful, contextual information
+- **🔍 Semantic Search**: Domain-specific search tools (`search_laws`, `find_companies`, `get_regulations`)
+- **📊 Rich Content Extraction**: Full text extraction with metadata and relationships
+- **⚡ Intelligent Caching**: Optimized for legal documents (content rarely changes)
+- **🌐 Multi-format Support**: HTML, PDF, and structured data integration
+- **🔄 Content Transformation**: Converts URIs to human-readable legal content
+
+## 🎯 Purpose
+
+Unlike generic SPARQL servers, this server is built for AI agents that need to understand and work with Luxembourg legal information. It bridges the gap between raw government data and AI-consumable knowledge.
 
 ## 📋 Requirements
 
 - Python 3.8 or newer
-- `SPARQLWrapper` library
 - `fastmcp` framework
+- `langchain` for document processing
+- `beautifulsoup4` for HTML extraction
+- `pypdf` for PDF processing
+- `SPARQLWrapper` for SPARQL queries
 - `pydantic` for configuration
-- `python-daemon` for background execution
 
 ## 🚀 Installation
 
@@ -49,8 +44,8 @@ MCP SPARQL Server is a high-performance, configurable server that connects to an
 
 ```bash
 # Clone the repository
-git clone https://github.com/yet-market/yet-sparql-mcp-server.git
-cd yet-sparql-mcp-server
+git clone https://github.com/yet-market/mcp-luxembourg-legal.git
+cd mcp-luxembourg-legal
 
 # Install dependencies
 pip install -r requirements.txt
@@ -59,310 +54,147 @@ pip install -r requirements.txt
 pip install -e .
 ```
 
-### From PyPI
+### Quick Start
 
 ```bash
-pip install mcp-server-sparql
+# Start the server
+python server.py --endpoint https://data.legilux.public.lu/sparqlendpoint
+
+# Using HTTP transport for web integration
+python server.py --transport http --endpoint https://data.legilux.public.lu/sparqlendpoint
 ```
-
-### Using the Installation Script
-
-For a full installation with systemd service setup:
-
-```bash
-# Download the repository
-git clone https://github.com/yet-market/yet-sparql-mcp-server.git
-cd yet-sparql-mcp-server
-
-# Run the installation script (as root for systemd service)
-sudo ./install.sh
-```
-
-The installer automatically:
-- Sets up virtual environment and dependencies
-- Creates and starts systemd services
-- Provides management scripts for easy control
-- Configures the HTTP service for nginx integration
-
-### Quick Management
-
-After installation, use the provided scripts:
-
-```bash
-# Check status
-./status.sh
-
-# Start/stop services
-./start.sh [stdio|http]    # Start service (http is default)
-./stop.sh [stdio|http]     # Stop service
-./logs.sh [stdio|http]     # View logs
-
-# Examples
-./start.sh http            # Start HTTP service for nginx
-./logs.sh http             # View HTTP service logs
-./test.sh                  # Test server functionality
-./stop.sh                  # Stop all services
-```
-
-### Testing Your Installation
-
-Test your server with the built-in test suite:
-
-```bash
-# Run comprehensive tests
-./test.sh
-
-# Run specific tests
-./test.sh endpoint         # Test HTTP connectivity
-./test.sh service          # Test service status
-./test.sh config           # Test configuration
-./test.sh mcp              # Test MCP protocol
-./test.sh client           # Test with FastMCP client
-./test.sh info             # Show connection info
-```
-
-The test script validates:
-- ✅ Service status and health
-- ✅ HTTP endpoint connectivity  
-- ✅ MCP protocol compliance
-- ✅ Configuration validity
-- ✅ SPARQL endpoint reachability
-- ✅ FastMCP client integration
 
 ## 🔍 Usage
 
-### Basic Usage (stdio transport)
+### Luxembourg-Specific Tools
 
-Start the server by specifying a SPARQL endpoint:
+The server provides specialized tools designed for Luxembourg legal data:
 
-```bash
-python server.py --endpoint https://dbpedia.org/sparql
+#### Search Legal Documents
+
+```python
+# Search for tax-related laws with full content
+result = await client.call_tool("search_luxembourg_documents", {
+    "keyword": "taxe",
+    "include_content": True,
+    "content_preference": "html"  # or "pdf" or "both"
+})
 ```
 
-### HTTP Server Mode (for nginx/web integration)
+#### Find Company Information
 
-Run the server as an HTTP server:
-
-```bash
-# Basic HTTP server
-python server.py --transport http --endpoint https://dbpedia.org/sparql
-
-# Custom host and port
-python server.py --transport http --host 0.0.0.0 --port 8080 --endpoint https://dbpedia.org/sparql
-
-# Using environment variables
-export MCP_TRANSPORT=http
-export MCP_HOST=0.0.0.0
-export MCP_PORT=8000
-export SPARQL_ENDPOINT=https://dbpedia.org/sparql
-python server.py
+```python
+# Search for companies with detailed information
+result = await client.call_tool("search_companies", {
+    "query": "technology companies",
+    "include_details": True
+})
 ```
 
-### Running as a Daemon
+#### Get Regulation Details
 
-To run the server as a background process (stdio transport):
-
-```bash
-python server.py --endpoint https://dbpedia.org/sparql --daemon \
-  --log-file /var/log/mcp-sparql.log \
-  --pid-file /var/run/mcp-sparql.pid
+```python
+# Find specific regulations with full text
+result = await client.call_tool("search_regulations", {
+    "topic": "environmental",
+    "date_from": "2020-01-01"
+})
 ```
 
-To run the HTTP server as a daemon:
-
-```bash
-python server.py --transport http --host 0.0.0.0 --port 8000 \
-  --endpoint https://dbpedia.org/sparql --daemon \
-  --log-file /var/log/mcp-sparql.log \
-  --pid-file /var/run/mcp-sparql.pid
-```
-
-### Using with Systemd
-
-If installed with systemd support:
-
-1. Configure your endpoint in the environment file:
-   ```bash
-   sudo nano /etc/mcp-sparql/env
-   ```
-
-2. Start the service:
-   ```bash
-   sudo systemctl start sparql-server
-   ```
-
-3. Enable on boot:
-   ```bash
-   sudo systemctl enable sparql-server
-   ```
-
-### Client Query Examples
-
-After starting the server, you can use it with any MCP-compatible client or through the FastMCP client:
-
-#### Using FastMCP Client with stdio transport (Python)
+### Example Client Usage
 
 ```python
 import asyncio
 from fastmcp.client import Client, PythonStdioTransport
 
-async def query_server():
-    # Connect to the server
+async def query_luxembourg_legal():
     transport = PythonStdioTransport(
         script_path="server.py",
-        args=["--endpoint", "https://dbpedia.org/sparql"]
+        args=["--endpoint", "https://data.legilux.public.lu/sparqlendpoint"]
     )
     
     async with Client(transport) as client:
-        # Execute a SPARQL query
-        result = await client.call_tool("query", {
-            "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
-            "format": "simplified"
+        # Search for tax regulations
+        result = await client.call_tool("search_luxembourg_documents", {
+            "keyword": "taxe",
+            "include_content": True
         })
         
-        print(result[0].text)
+        print("Luxembourg Tax Regulations:")
+        for doc in result[0].content['documents']:
+            print(f"- {doc['title']} ({doc['date']})")
+            print(f"  Content: {doc['content'][:200]}...")
 
-asyncio.run(query_server())
+asyncio.run(query_luxembourg_legal())
 ```
 
-#### Using FastMCP Client with HTTP transport (Python)
+## 🛠️ Document Processing Pipeline
 
-```python
-import asyncio
-from fastmcp.client import Client, HttpTransport
+### Phase 1: SPARQL Discovery
+1. Execute keyword-based SPARQL queries
+2. Retrieve document metadata (URIs, dates, titles, types)
+3. Deduplicate results by entity URI
 
-async def query_server():
-    # Connect to HTTP server
-    transport = HttpTransport("http://localhost:8000")
-    
-    async with Client(transport) as client:
-        # Execute a SPARQL query
-        result = await client.call_tool("query", {
-            "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
-            "format": "simplified"
-        })
-        
-        print(result[0].text)
+### Phase 2: Content Extraction
+1. For each document URI:
+   - Try `{uri}/fr/html` → extract `<body>` content
+   - If no content: try `{uri}/fr/pdf` → extract PDF text
+2. Use Langchain document loaders for robust processing
+3. Clean and structure extracted content
 
-asyncio.run(query_server())
+### Phase 3: Intelligence Enhancement
+1. Combine metadata with full content
+2. Identify relationships between documents
+3. Add semantic context and legal structure
+4. Return AI-ready structured results
+
+## 📊 Result Structure
+
+### Luxembourg Document Results
+
+```json
+{
+  "documents": [
+    {
+      "uri": "http://data.legilux.public.lu/eli/etat/leg/rc/1990/07/05/n3/jo",
+      "date": "1990-07-05",
+      "title": "Règlement-taxe sur les heures de travail prestées par les ouvriers communaux",
+      "types": ["LegalResource", "NationalLegalResource", "Work", "Act"],
+      "content": "Full extracted document text with legal provisions...",
+      "relationships": [
+        {
+          "type": "amendment",
+          "target": "http://data.legilux.public.lu/eli/etat/leg/rc/1995/03/15/n2/jo",
+          "description": "Amended by regulation of 1995-03-15"
+        }
+      ],
+      "metadata": {
+        "language": "fr",
+        "content_type": "html",
+        "extraction_date": "2025-01-27T10:30:00Z",
+        "word_count": 1250
+      }
+    }
+  ],
+  "query_metadata": {
+    "keyword": "taxe",
+    "total_found": 15,
+    "processing_time": "2.3s",
+    "sparql_query": "PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>..."
+  }
+}
 ```
 
-#### Query with Different Formats
+## 🇱🇺 Luxembourg Data Sources
 
-```python
-# JSON format (default)
-result = await client.call_tool("query", {
-    "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
-    "format": "json"
-})
+The server is optimized for:
 
-# Tabular format
-result = await client.call_tool("query", {
-    "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 5",
-    "format": "tabular"
-})
-```
-
-#### Cache Management
-
-```python
-# Get cache statistics
-cache_stats = await client.call_tool("cache", {"action": "stats"})
-
-# Clear the cache
-cache_clear = await client.call_tool("cache", {"action": "clear"})
-```
+- **Legal Documents**: Laws, regulations, decrees, and administrative acts
+- **Company Registry**: Business registrations, modifications, and dissolutions  
+- **Official Publications**: Government announcements and legal notices
+- **Administrative Data**: Geographic information, classifications, and references
 
 ## ⚙️ Configuration
-
-### Command-line Arguments
-
-<table>
-<thead>
-  <tr>
-    <th>Argument</th>
-    <th>Description</th>
-    <th>Default</th>
-  </tr>
-</thead>
-<tbody>
-  <tr>
-    <td><code>--endpoint URL</code></td>
-    <td>SPARQL endpoint URL</td>
-    <td>Required</td>
-  </tr>
-  <tr>
-    <td><code>--timeout SECONDS</code></td>
-    <td>Request timeout in seconds</td>
-    <td>30</td>
-  </tr>
-  <tr>
-    <td><code>--format FORMAT</code></td>
-    <td>Result format (json, simplified, tabular)</td>
-    <td>json</td>
-  </tr>
-  <tr>
-    <td><code>--cache-enabled BOOL</code></td>
-    <td>Enable result caching</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <td><code>--cache-ttl SECONDS</code></td>
-    <td>Cache time-to-live in seconds</td>
-    <td>300</td>
-  </tr>
-  <tr>
-    <td><code>--cache-max-size SIZE</code></td>
-    <td>Maximum cache size</td>
-    <td>100</td>
-  </tr>
-  <tr>
-    <td><code>--cache-strategy STRATEGY</code></td>
-    <td>Cache replacement strategy (lru, lfu, fifo)</td>
-    <td>lru</td>
-  </tr>
-  <tr>
-    <td><code>--pretty-print</code></td>
-    <td>Pretty print JSON output</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td><code>--include-metadata BOOL</code></td>
-    <td>Include query metadata in results</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <td><code>--daemon</code></td>
-    <td>Run as a background daemon</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td><code>--log-file FILE</code></td>
-    <td>Log file location when running as a daemon</td>
-    <td>/var/log/mcp-sparql-server.log</td>
-  </tr>
-  <tr>
-    <td><code>--pid-file FILE</code></td>
-    <td>PID file location when running as a daemon</td>
-    <td>/var/run/mcp-sparql-server.pid</td>
-  </tr>
-  <tr>
-    <td><code>--transport TRANSPORT</code></td>
-    <td>Transport type (stdio or http)</td>
-    <td>stdio</td>
-  </tr>
-  <tr>
-    <td><code>--host HOST</code></td>
-    <td>Host to bind HTTP server to</td>
-    <td>localhost</td>
-  </tr>
-  <tr>
-    <td><code>--port PORT</code></td>
-    <td>Port to bind HTTP server to</td>
-    <td>8000</td>
-  </tr>
-</tbody>
-</table>
 
 ### Environment Variables
 
@@ -376,363 +208,74 @@ cache_clear = await client.call_tool("cache", {"action": "clear"})
 </thead>
 <tbody>
   <tr>
-    <td><code>SPARQL_ENDPOINT</code></td>
-    <td>SPARQL endpoint URL</td>
-    <td>None (required)</td>
+    <td><code>LUXEMBOURG_SPARQL_ENDPOINT</code></td>
+    <td>Luxembourg SPARQL endpoint URL</td>
+    <td>https://data.legilux.public.lu/sparqlendpoint</td>
   </tr>
   <tr>
-    <td><code>SPARQL_TIMEOUT</code></td>
-    <td>Request timeout in seconds</td>
-    <td>30</td>
+    <td><code>CONTENT_CACHE_TTL</code></td>
+    <td>Content cache duration (legal docs change rarely)</td>
+    <td>86400 (24 hours)</td>
   </tr>
   <tr>
-    <td><code>SPARQL_FORMAT</code></td>
-    <td>Default result format</td>
-    <td>json</td>
+    <td><code>EXTRACTION_TIMEOUT</code></td>
+    <td>Document extraction timeout</td>
+    <td>60 seconds</td>
   </tr>
   <tr>
-    <td><code>SPARQL_CACHE_ENABLED</code></td>
-    <td>Enable caching</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <td><code>SPARQL_CACHE_TTL</code></td>
-    <td>Cache time-to-live in seconds</td>
-    <td>300</td>
-  </tr>
-  <tr>
-    <td><code>SPARQL_CACHE_MAX_SIZE</code></td>
-    <td>Maximum cache size</td>
-    <td>100</td>
-  </tr>
-  <tr>
-    <td><code>SPARQL_CACHE_STRATEGY</code></td>
-    <td>Cache replacement strategy</td>
-    <td>lru</td>
-  </tr>
-  <tr>
-    <td><code>SPARQL_PRETTY_PRINT</code></td>
-    <td>Pretty print JSON output</td>
-    <td>false</td>
-  </tr>
-  <tr>
-    <td><code>SPARQL_INCLUDE_METADATA</code></td>
-    <td>Include query metadata in results</td>
-    <td>true</td>
-  </tr>
-  <tr>
-    <td><code>MCP_TRANSPORT</code></td>
-    <td>Transport type (stdio or http)</td>
-    <td>stdio</td>
-  </tr>
-  <tr>
-    <td><code>MCP_HOST</code></td>
-    <td>Host to bind HTTP server to</td>
-    <td>localhost</td>
-  </tr>
-  <tr>
-    <td><code>MCP_PORT</code></td>
-    <td>Port to bind HTTP server to</td>
-    <td>8000</td>
+    <td><code>DEFAULT_LANGUAGE</code></td>
+    <td>Preferred content language</td>
+    <td>fr</td>
   </tr>
 </tbody>
 </table>
 
-## 🌐 Nginx Integration
-
-When using HTTP transport, you can integrate the server with nginx as a reverse proxy:
-
-### 1. Start the server in HTTP mode
-
-```bash
-python server.py --transport http --host localhost --port 8000 --endpoint https://your-sparql-endpoint.com/sparql
-```
-
-### 2. Configure nginx
-
-Add this configuration to your nginx server block:
-
-```nginx
-upstream mcp_sparql {
-    server localhost:8000;
-    # Add more servers for load balancing if needed
-    # server localhost:8001;
-    # server localhost:8002;
-}
-
-server {
-    listen 80;
-    server_name your-domain.com;
-
-    location /api/sparql {
-        proxy_pass http://mcp_sparql;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Optional: Add CORS headers
-        add_header Access-Control-Allow-Origin *;
-        add_header Access-Control-Allow-Methods "GET, POST, OPTIONS";
-        add_header Access-Control-Allow-Headers "Content-Type, Authorization";
-    }
-}
-```
-
-### 3. Production deployment with systemd
-
-Create a systemd service for HTTP mode:
-
-```ini
-# /etc/systemd/system/mcp-sparql-http.service
-[Unit]
-Description=MCP SPARQL Server (HTTP)
-After=network.target
-
-[Service]
-Type=simple
-User=mcp-sparql
-Group=mcp-sparql
-WorkingDirectory=/opt/mcp-sparql
-Environment=MCP_TRANSPORT=http
-Environment=MCP_HOST=localhost
-Environment=MCP_PORT=8000
-Environment=SPARQL_ENDPOINT=https://your-sparql-endpoint.com/sparql
-ExecStart=/opt/mcp-sparql/venv/bin/python server.py
-Restart=always
-RestartSec=3
-
-[Install]
-WantedBy=multi-user.target
-```
-
-Enable and start the service:
-
-```bash
-sudo systemctl enable mcp-sparql-http
-sudo systemctl start mcp-sparql-http
-```
-
-## 📊 Result Formats
-
-The server supports three different output formats:
-
-### 1. JSON Format (default)
-
-Returns the standard SPARQL JSON results format with optional metadata.
-
-```json
-{
-  "head": {
-    "vars": ["s", "p", "o"]
-  },
-  "results": {
-    "bindings": [
-      {
-        "s": { "type": "uri", "value": "http://example.org/resource" },
-        "p": { "type": "uri", "value": "http://example.org/property" },
-        "o": { "type": "literal", "value": "Example Value" }
-      }
-    ]
-  },
-  "metadata": {
-    "variables": ["s", "p", "o"],
-    "count": 1,
-    "query": "SELECT * WHERE { ?s ?p ?o } LIMIT 1"
-  }
-}
-```
-
-### 2. Simplified Format
-
-Returns a simplified JSON structure that's easier to work with, converting variable bindings into simple key-value objects.
-
-```json
-{
-  "type": "SELECT",
-  "results": [
-    {
-      "s": "http://example.org/resource",
-      "p": "http://example.org/property",
-      "o": "Example Value"
-    }
-  ],
-  "metadata": {
-    "variables": ["s", "p", "o"],
-    "count": 1,
-    "query": "SELECT * WHERE { ?s ?p ?o } LIMIT 1"
-  }
-}
-```
-
-### 3. Tabular Format
-
-Returns results in a tabular format with columns and rows, suitable for table display.
-
-```json
-{
-  "type": "SELECT",
-  "columns": [
-    { "name": "s", "label": "s" },
-    { "name": "p", "label": "p" },
-    { "name": "o", "label": "o" }
-  ],
-  "rows": [
-    [
-      "http://example.org/resource",
-      "http://example.org/property",
-      "Example Value"
-    ]
-  ],
-  "metadata": {
-    "variables": ["s", "p", "o"],
-    "count": 1,
-    "query": "SELECT * WHERE { ?s ?p ?o } LIMIT 1"
-  }
-}
-```
-
-## 🔄 Cache Strategies
-
-The server supports three cache replacement strategies:
-
-### 1. LRU (Least Recently Used)
-
-Evicts the least recently accessed items first. This is the default strategy and works well for most scenarios, as it prioritizes keeping recently accessed items in the cache.
-
-### 2. LFU (Least Frequently Used)
-
-Evicts the least frequently accessed items first. This strategy is good for scenarios where some queries are much more common than others, as it prioritizes keeping frequently accessed items in the cache.
-
-### 3. FIFO (First In First Out)
-
-Evicts the oldest items first, regardless of access patterns. This strategy is simpler and can be useful when you want a purely time-based caching approach.
-
-## 🔍 Advanced SPARQL Examples
-
-The server supports all SPARQL features. Here are some example queries you can try:
-
-### Basic Triple Pattern
-
-```sparql
-SELECT * WHERE { ?s ?p ?o } LIMIT 10
-```
-
-### Filtering by Property Type
-
-```sparql
-PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT ?subject ?label
-WHERE {
-    ?subject rdf:type rdfs:Class ;
-             rdfs:label ?label .
-}
-LIMIT 10
-```
-
-### Using Regular Expressions
-
-```sparql
-PREFIX foaf: <http://xmlns.com/foaf/0.1/>
-
-SELECT ?person ?name
-WHERE {
-    ?person foaf:name ?name .
-    FILTER(REGEX(?name, "Smith", "i"))
-}
-LIMIT 10
-```
-
-### Complex Query with Multiple Patterns
-
-```sparql
-PREFIX dbo: <http://dbpedia.org/ontology/>
-PREFIX dbp: <http://dbpedia.org/property/>
-PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
-
-SELECT ?city ?name ?population ?country ?countryName
-WHERE {
-    ?city a dbo:City ;
-          rdfs:label ?name ;
-          dbo:population ?population ;
-          dbo:country ?country .
-    ?country rdfs:label ?countryName .
-    FILTER(?population > 1000000)
-    FILTER(LANG(?name) = 'en')
-    FILTER(LANG(?countryName) = 'en')
-}
-ORDER BY DESC(?population)
-LIMIT 10
-```
-
-## ⚠️ Troubleshooting
-
-### Common Issues
-
-- **Connection refused**: Check that the SPARQL endpoint URL is correct and accessible
-- **Query timeout**: Increase the timeout value with `--timeout` option
-- **Memory issues with large result sets**: Add LIMIT clause to your queries or reduce cache size
-- **Permission denied for log/pid files**: Check directory permissions or run with appropriate privileges
-
-### Logging
-
-When running in foreground mode, logs are output to the console. When running as a daemon, logs are written to the specified log file (default: `/var/log/mcp-sparql-server.log`).
-
-To increase verbosity, you can set the Python logging level in the source code.
-
-## 🛠️ Development
+## 🔧 Development
 
 ### Project Structure
 
 ```
-mcp-server-sparql/
-├── sparql_server/             # Main package
-│   ├── core/                  # Core functionality
-│   │   ├── __init__.py        # Package exports
-│   │   ├── config.py          # Configuration management
-│   │   └── server.py          # Main SPARQL server
-│   ├── formatters/            # Result formatters
-│   │   ├── __init__.py        # Package exports
-│   │   ├── formatter.py       # Base formatter class
-│   │   ├── json_formatter.py  # JSON formatter
-│   │   ├── simplified_formatter.py # Simplified JSON formatter
-│   │   └── tabular_formatter.py # Tabular formatter
-│   ├── cache/                 # Caching implementation
-│   │   ├── __init__.py        # Package exports
-│   │   ├── query_cache.py     # Base cache interface
-│   │   ├── lru_cache.py       # LRU cache implementation
-│   │   ├── lfu_cache.py       # LFU cache implementation
-│   │   └── fifo_cache.py      # FIFO cache implementation
-│   └── __init__.py            # Package exports
-├── server.py                  # Main entry point
-├── setup.py                   # Package setup
-├── install.sh                 # Installation script
-├── requirements.txt           # Python dependencies
-├── sparql-server.service      # Systemd service file
-├── README.md                  # This file
-└── LICENSE                    # License file
+mcp-luxembourg-legal/
+├── luxembourg_legal_server/        # Main package (renamed from sparql_server)
+│   ├── core/                      # Core functionality
+│   │   ├── config.py              # Luxembourg-specific configuration
+│   │   └── server.py              # Legal intelligence server
+│   ├── extractors/                # Content extraction (NEW)
+│   │   ├── html_extractor.py      # HTML content extraction
+│   │   ├── pdf_extractor.py       # PDF content extraction
+│   │   └── content_processor.py   # Langchain-based processing
+│   ├── legal/                     # Luxembourg legal processing (NEW)
+│   │   ├── document_classifier.py # Legal document classification
+│   │   ├── relationship_mapper.py # Document relationship detection
+│   │   └── semantic_processor.py  # Legal semantic understanding
+│   ├── formatters/                # Result formatters (enhanced)
+│   └── cache/                     # Caching (optimized for legal content)
+├── server.py                      # Main entry point (enhanced)
+└── requirements.txt               # Updated dependencies
 ```
 
-### Running Tests
+## 🎯 AI Integration Benefits
 
-```bash
-# Test stdio transport
-python test_sparql_server.py
+### For AI Agents
 
-# Test HTTP transport (start server first)
-# Terminal 1:
-python server.py --transport http --endpoint https://dbpedia.org/sparql
-# Terminal 2:
-# Run HTTP-specific tests (if available)
-```
+- **Rich Context**: Full document content instead of just URIs
+- **Legal Understanding**: Structured legal information with relationships
+- **Semantic Search**: Domain-specific tools that understand legal concepts
+- **Multi-format Processing**: Handles various Luxembourg government document formats
 
-## 🔒 Security Considerations
+### For Users
 
-- The server doesn't implement authentication or authorization - it relies on the security of the underlying SPARQL endpoint
-- For production use, consider deploying behind a secure proxy
-- Be careful with untrusted queries as they could potentially be resource-intensive
+- **Natural Queries**: "Show me environmental regulations for companies"
+- **Complete Answers**: Full legal text with context and relationships
+- **Current Information**: Direct access to official Luxembourg government data
+- **Intelligent Processing**: Automated content extraction and structuring
+
+## 🔒 Security & Compliance
+
+- Accesses only public Luxembourg government data
+- No authentication required (public SPARQL endpoint)
+- Respects government data access policies
+- Implements responsible caching for public documents
 
 ## 📄 License
 
@@ -745,50 +288,15 @@ See the [LICENSE](LICENSE) file for complete details.
 
 This software was imagined and developed by Temkit Sid-Ali for Yet.lu with AI assistance from Claude (Anthropic), GitHub Copilot/Codex (OpenAI), and GPT-o3 (OpenAI).
 
-## 🚀 Roadmap
+## 🤝 Related Projects
 
-We have exciting plans for the future! Check out our [detailed roadmap](ROADMAP.md) to see what's coming next, including:
-
-- 🔒 Enhanced security and authentication
-- 🌐 Web interface for query exploration
-- 🤖 AI-powered natural language to SPARQL conversion
-- 📊 Advanced data visualization and analytics
-- 🏢 Enterprise features and scalability improvements
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-See our [Contributing Guide](CONTRIBUTING.md) for detailed development setup and guidelines.
-
-## 🙏 Acknowledgments
-
-This project is built on top of several excellent open source projects:
-
-- **[FastMCP](https://github.com/jlowin/fastmcp)** - High-level Python framework for building MCP servers and clients by Joel Lowin
-- **[SPARQLWrapper](https://github.com/RDFLib/sparqlwrapper)** - SPARQL endpoint interface for Python by the RDFLib team
-- **[Pydantic](https://github.com/pydantic/pydantic)** - Data validation using Python type hints by Samuel Colvin and the Pydantic team
-- **[python-daemon](https://github.com/breezy-team/python-daemon)** - Library for making Unix daemon processes
-
-Special thanks to:
-- The **Model Context Protocol (MCP)** community for developing the protocol specification
-- **Anthropic** for their work on AI assistants and the MCP ecosystem
-- The **semantic web** and **RDF** communities for their foundational work
-- **W3C** for the SPARQL specification and standards
-- **AI Development Partners**:
-  - **Claude (Anthropic)** - Primary development assistant for architecture, code implementation, and documentation
-  - **GitHub Copilot/Codex (OpenAI)** - Code completion and development acceleration
-  - **GPT-o3 (OpenAI)** - Advanced reasoning and problem-solving assistance
+- **[MCP SPARQL Server](https://github.com/yet-market/yet-sparql-mcp-server)** - Generic SPARQL MCP server
+- **[Luxembourg Open Data](https://data.public.lu/)** - Official Luxembourg open data portal
+- **[Legilux](https://legilux.public.lu/)** - Luxembourg legal publications
 
 ## 📬 Contact
 
-- GitHub Issues: [https://github.com/yet-market/yet-sparql-mcp-server/issues](https://github.com/yet-market/yet-sparql-mcp-server/issues)
+- GitHub Issues: [https://github.com/yet-market/mcp-luxembourg-legal/issues](https://github.com/yet-market/mcp-luxembourg-legal/issues)
 - Website: [https://yet.lu](https://yet.lu)
 - Development: dev@yet.lu
 - Commercial licensing: legal@yet.lu
