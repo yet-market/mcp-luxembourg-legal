@@ -30,7 +30,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Outdated MCP client implementations
 
 ### Fixed
+- HTTP transport implementation using correct FastMCP `streamable-http` transport
 - Pydantic validation error: replaced deprecated `regex` parameter with `pattern`
+- Installation script (install.sh) with proper systemd service configuration
+- Service files with correct Python paths and virtual environment setup
 - Import errors in server.py and test files
 - FastMCP client integration and response parsing
 - Dependencies in requirements.txt
