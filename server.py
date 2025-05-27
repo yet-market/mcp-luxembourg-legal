@@ -18,7 +18,8 @@ from pathlib import Path
 from fastmcp import FastMCP
 from pydantic import HttpUrl
 
-from sparql_server.core import SPARQLServer, SPARQLConfig, ResultFormat, CacheStrategy
+from luxembourg_legal_server.core import SPARQLServer, SPARQLConfig, ResultFormat, CacheStrategy
+from luxembourg_legal_server.extractors import ContentProcessor
 
 # Configure logging
 logging.basicConfig(
@@ -192,6 +193,9 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     # Initialize the SPARQL server with the configuration
     sparql_server = SPARQLServer(config)
     
+    # Initialize content processor for Luxembourg legal documents
+    content_processor = ContentProcessor()
+    
     # Create the MCP server
     mcp = FastMCP("SPARQL Query Server")
     
@@ -269,6 +273,87 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
                 "status": "error", 
                 "message": f"Invalid cache action: {action}. Must be 'clear' or 'stats'."
             }
+    
+    # Luxembourg Legal Intelligence Tools
+    
+    @mcp.tool(description="Search Luxembourg legal documents with full content extraction")
+    def search_luxembourg_documents(
+        keywords: str,
+        limit: int = 10,
+        include_content: bool = True
+    ) -> Dict[str, Any]:
+        """Search Luxembourg legal documents and extract full content.
+        
+        Args:
+            keywords: Search keywords (e.g., 'environmental protection', 'tax law')
+            limit: Maximum number of results (default: 10)
+            include_content: Whether to extract full document content (default: true)
+            
+        Returns:
+            List of documents with metadata and full content
+        """
+        logger.info(f"Searching Luxembourg documents for: {keywords}")
+        
+        # Use exact SPARQL query as provided by user
+        query = f"""
+        PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
+        PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+        
+        SELECT DISTINCT ?entity ?date ?title ?docType
+        WHERE {{
+            ?entity jolux:dateDocument ?date ;
+                    a ?docType ;
+                    jolux:isRealizedBy ?expression .
+            ?expression jolux:title ?title .
+            FILTER(regex(str(?title), '{keywords}'^^xsd:string))
+        }}
+        ORDER BY DESC(?date)
+        LIMIT {limit}
+        """
+        
+        try:
+            # Execute SPARQL query
+            results = sparql_server.query(query, ResultFormat.SIMPLIFIED)
+            
+            # Handle SimplifiedFormatter results - results.results is a list of simplified objects
+            search_results = results.get('results', [])
+            if not search_results:
+                return {"results": [], "message": "No documents found"}
+            
+            documents = []
+            for result in search_results:
+                doc = {
+                    'uri': result.get('entity', ''),
+                    'title': result.get('title', ''),
+                    'date': result.get('date', ''),
+                    'type': result.get('docType', ''),
+                }
+                
+                # Extract full content if requested
+                if include_content and doc['uri']:
+                    content = content_processor.extract_entity_content(doc['uri'])
+                    if content:
+                        doc.update({
+                            'content': content.get('text', ''),
+                            'summary': content.get('summary', ''),
+                            'document_type': content.get('document_type', ''),
+                            'legal_concepts': content.get('legal_concepts', []),
+                            'content_source': content.get('source_url', ''),
+                            'content_type': content.get('content_type', '')
+                        })
+                
+                documents.append(doc)
+            
+            return {
+                "results": documents,
+                "count": len(documents),
+                "query_used": query
+            }
+            
+        except Exception as e:
+            logger.error(f"Error searching documents: {e}")
+            return {"error": f"Search failed: {str(e)}"}
+    
     
     # Handle signals for graceful shutdown
     def signal_handler(signum, frame):

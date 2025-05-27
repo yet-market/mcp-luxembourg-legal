@@ -8,7 +8,7 @@ a tabular structure with columns and rows.
 import json
 from typing import Any, Dict, List, Optional, Tuple
 
-from sparql_server.formatters.formatter import ResultFormatter
+from luxembourg_legal_server.formatters.formatter import ResultFormatter
 
 
 class TabularFormatter(ResultFormatter):

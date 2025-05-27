@@ -19,7 +19,7 @@ __email__ = "contact@yet.lu"
 __license__ = "AGPL-3.0 or Commercial License"
 __copyright__ = "Copyright (c) 2025 Yet.lu"
 
-from sparql_server.core.server import SPARQLServer
-from sparql_server.core.config import SPARQLConfig
+from luxembourg_legal_server.core.server import SPARQLServer
+from luxembourg_legal_server.core.config import SPARQLConfig
 
 __all__ = ["SPARQLServer", "SPARQLConfig"]

@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 from fastmcp import FastMCP
 from fastmcp.client import Client, PythonStdioTransport
-from sparql_server.core import SPARQLConfig, SPARQLServer, ResultFormat
+from luxembourg_legal_server.core import SPARQLConfig, SPARQLServer, ResultFormat
 
 
 async def test_in_memory_client():
@@ -105,18 +105,33 @@ async def test_stdio_client():
         
         # List tools
         tools = await client.list_tools()
-        print(f"✓ Available tools: {[tool.name for tool in tools]}")
+        tool_names = [tool.name for tool in tools]
+        print(f"✓ Available tools: {tool_names}")
         
-        # Test query tool
+        # Test Luxembourg search tool
+        if "search_luxembourg_documents" in tool_names:
+            search_result = await client.call_tool("search_luxembourg_documents", {
+                "keywords": "taxe",
+                "limit": 1,
+                "include_content": False
+            })
+            
+            result_text = search_result[0].text
+            result_data = json.loads(result_text)
+            
+            print(f"✓ Luxembourg search successful: {'error' not in result_data}")
+            print(f"  Documents found: {len(result_data.get('results', []))}")
+        
+        # Test basic query tool
         query_result = await client.call_tool("query", {
             "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 1",
-            "format": "json"
+            "format": "simplified"
         })
         
         result_text = query_result[0].text
         result_data = json.loads(result_text)
         
-        print(f"✓ Stdio query successful: {'error' not in result_data}")
+        print(f"✓ Basic query successful: {'error' not in result_data}")
         print(f"  Results returned: {len(result_data.get('results', []))}")
         
         # Test cache management

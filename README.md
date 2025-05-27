@@ -18,7 +18,7 @@ MCP Luxembourg Legal Intelligence Server is a specialized MCP (Model Context Pro
 - **🇱🇺 Luxembourg Legal Focus**: Specialized tools for Luxembourg legal system
 - **📄 Smart Document Processing**: Automatic HTML and PDF content extraction
 - **🧠 AI-Ready Content**: Transforms raw government data into meaningful, contextual information
-- **🔍 Semantic Search**: Domain-specific search tools (`search_laws`, `find_companies`, `get_regulations`)
+- **🔍 Semantic Search**: Domain-specific search tools (`search_luxembourg_documents`)
 - **📊 Rich Content Extraction**: Full text extraction with metadata and relationships
 - **⚡ Intelligent Caching**: Optimized for legal documents (content rarely changes)
 - **🌐 Multi-format Support**: HTML, PDF, and structured data integration
@@ -81,23 +81,14 @@ result = await client.call_tool("search_luxembourg_documents", {
 })
 ```
 
-#### Find Company Information
+#### Search Luxembourg Legal Documents
 
 ```python
-# Search for companies with detailed information
-result = await client.call_tool("search_companies", {
-    "query": "technology companies",
-    "include_details": True
-})
-```
-
-#### Get Regulation Details
-
-```python
-# Find specific regulations with full text
-result = await client.call_tool("search_regulations", {
-    "topic": "environmental",
-    "date_from": "2020-01-01"
+# Search for legal documents with full content extraction
+result = await client.call_tool("search_luxembourg_documents", {
+    "keywords": "taxe",
+    "limit": 10,
+    "include_content": True
 })
 ```
 
@@ -116,14 +107,19 @@ async def query_luxembourg_legal():
     async with Client(transport) as client:
         # Search for tax regulations
         result = await client.call_tool("search_luxembourg_documents", {
-            "keyword": "taxe",
+            "keywords": "taxe",
             "include_content": True
         })
         
+        # Parse the JSON response
+        import json
+        result_data = json.loads(result[0].text)
+        
         print("Luxembourg Tax Regulations:")
-        for doc in result[0].content['documents']:
+        for doc in result_data['results']:
             print(f"- {doc['title']} ({doc['date']})")
-            print(f"  Content: {doc['content'][:200]}...")
+            if doc.get('content'):
+                print(f"  Content: {doc['content'][:200]}...")
 
 asyncio.run(query_luxembourg_legal())
 ```
@@ -154,34 +150,22 @@ asyncio.run(query_luxembourg_legal())
 
 ```json
 {
-  "documents": [
+  "results": [
     {
-      "uri": "http://data.legilux.public.lu/eli/etat/leg/rc/1990/07/05/n3/jo",
-      "date": "1990-07-05",
-      "title": "Règlement-taxe sur les heures de travail prestées par les ouvriers communaux",
-      "types": ["LegalResource", "NationalLegalResource", "Work", "Act"],
-      "content": "Full extracted document text with legal provisions...",
-      "relationships": [
-        {
-          "type": "amendment",
-          "target": "http://data.legilux.public.lu/eli/etat/leg/rc/1995/03/15/n2/jo",
-          "description": "Amended by regulation of 1995-03-15"
-        }
-      ],
-      "metadata": {
-        "language": "fr",
-        "content_type": "html",
-        "extraction_date": "2025-01-27T10:30:00Z",
-        "word_count": 1250
-      }
+      "uri": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/04/10/a147/jo",
+      "title": "Règlement grand-ducal du 10 avril 2025 portant fixation de la taxe de rejet des eaux usées",
+      "date": "2025-04-10",
+      "type": "http://data.legilux.public.lu/resource/ontology/jolux#LegalResource",
+      "content": "Journal officiel du Grand-Duché de Luxembourg...",
+      "content_type": "html",
+      "content_source": "http://data.legilux.public.lu/eli/etat/leg/rgd/2025/04/10/a147/jo/fr/html",
+      "summary": "Règlement grand-ducal portant fixation de la taxe de rejet des eaux usées pour l'année 2025",
+      "document_type": "loi",
+      "legal_concepts": ["tax", "environmental"]
     }
   ],
-  "query_metadata": {
-    "keyword": "taxe",
-    "total_found": 15,
-    "processing_time": "2.3s",
-    "sparql_query": "PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>..."
-  }
+  "count": 1,
+  "query_used": "PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>..."
 }
 ```
 

@@ -8,7 +8,7 @@ the standard JSON structure returned by SPARQL endpoints.
 import json
 from typing import Any, Dict, Optional
 
-from sparql_server.formatters.formatter import ResultFormatter
+from luxembourg_legal_server.formatters.formatter import ResultFormatter
 
 
 class JSONFormatter(ResultFormatter):

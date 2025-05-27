@@ -9,7 +9,7 @@ import time
 import heapq
 from typing import Any, Dict, List, Optional, Tuple
 
-from sparql_server.cache.query_cache import QueryCache
+from luxembourg_legal_server.cache.query_cache import QueryCache
 
 
 class LFUCache(QueryCache):

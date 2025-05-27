@@ -8,7 +8,7 @@ a simplified JSON structure that is easier to work with.
 import json
 from typing import Any, Dict, List, Optional
 
-from sparql_server.formatters.formatter import ResultFormatter
+from luxembourg_legal_server.formatters.formatter import ResultFormatter
 
 
 class SimplifiedFormatter(ResultFormatter):

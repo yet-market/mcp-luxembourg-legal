@@ -100,10 +100,9 @@ source venv/bin/activate && python server.py --transport http --host localhost -
 - **Official Publications**: Legal notices and announcements
 
 ### AI Tool Design
-- `search_luxembourg_documents`: Keyword-based legal document search with full content
-- `search_companies`: Company registry search with detailed information
-- `search_regulations`: Regulation-specific search with legal context
-- `get_entity_details`: Universal entity resolution with content fetching
+- `search_luxembourg_documents`: Keyword-based legal document search with full content extraction
+- `query`: Direct SPARQL query execution with result formatting
+- `cache`: Cache management for improved performance
 
 ## Content Extraction Strategy
 

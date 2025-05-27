@@ -10,14 +10,14 @@ from typing import Any, Dict, Optional, Type, Union
 
 from SPARQLWrapper import SPARQLWrapper, JSON, SPARQLExceptions
 
-from sparql_server.core.config import SPARQLConfig, ResultFormat, CacheStrategy
-from sparql_server.formatters import (
+from luxembourg_legal_server.core.config import SPARQLConfig, ResultFormat, CacheStrategy
+from luxembourg_legal_server.formatters import (
     ResultFormatter, 
     JSONFormatter,
     SimplifiedFormatter,
     TabularFormatter
 )
-from sparql_server.cache import QueryCache, LRUCache, LFUCache, FIFOCache
+from luxembourg_legal_server.cache import QueryCache, LRUCache, LFUCache, FIFOCache
 
 
 # Set up logging
