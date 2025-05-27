@@ -319,8 +319,10 @@ else
 fi
 EOF
 
-    # Copy test script to installation directory
-    cp test.sh "$INSTALL_DIR/test.sh"
+    # Copy test script to installation directory (if not already there)
+    if [ "$PWD" != "$INSTALL_DIR" ] && [ -f "test.sh" ]; then
+        cp test.sh "$INSTALL_DIR/test.sh"
+    fi
     
     # Make scripts executable
     chmod +x "$INSTALL_DIR/start.sh"
@@ -424,10 +426,9 @@ EOF
 
     chmod +x start.sh
     
-    # Copy test script for local installation
+    # Ensure test script is executable for local installation  
     if [ -f "test.sh" ]; then
-        cp test.sh ./test_local.sh
-        chmod +x test_local.sh
+        chmod +x test.sh
     fi
     
     print_status "Local installation complete!"
