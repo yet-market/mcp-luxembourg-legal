@@ -319,11 +319,15 @@ else
 fi
 EOF
 
+    # Copy test script to installation directory
+    cp test.sh "$INSTALL_DIR/test.sh"
+    
     # Make scripts executable
     chmod +x "$INSTALL_DIR/start.sh"
     chmod +x "$INSTALL_DIR/stop.sh"
     chmod +x "$INSTALL_DIR/status.sh"
     chmod +x "$INSTALL_DIR/logs.sh"
+    chmod +x "$INSTALL_DIR/test.sh"
     
     print_status "Systemd services installed successfully!"
     
@@ -348,6 +352,15 @@ EOF
         echo
         print_status "Service status:"
         systemctl status mcp-sparql-http --no-pager -l
+        
+        # Run basic connectivity test
+        echo
+        print_status "Running connectivity test..."
+        if timeout 5 curl -s http://localhost:8000/mcp/ > /dev/null 2>&1; then
+            print_status "✅ Server connectivity test passed!"
+        else
+            print_warning "⚠️  Server connectivity test failed (may still be starting)"
+        fi
     else
         print_error "❌ HTTP service failed to start!"
         echo "Check logs with: journalctl -u mcp-sparql-http -f"
@@ -367,6 +380,7 @@ EOF
     echo "  ./stop.sh     - Stop services" 
     echo "  ./status.sh   - Check service status"
     echo "  ./logs.sh     - View logs"
+    echo "  ./test.sh     - Test server functionality"
     echo
     echo "📊 Quick commands:"
     echo "  journalctl -u mcp-sparql-http -f     # View HTTP service logs"
@@ -410,10 +424,17 @@ EOF
 
     chmod +x start.sh
     
+    # Copy test script for local installation
+    if [ -f "test.sh" ]; then
+        cp test.sh ./test_local.sh
+        chmod +x test_local.sh
+    fi
+    
     print_status "Local installation complete!"
     echo
-    echo "📜 Management script created:"
+    echo "📜 Management scripts created:"
     echo "  ./start.sh [stdio|http]  - Start server locally"
+    echo "  ./test.sh                - Test server functionality"
     echo
     echo "🚀 Quick start:"
     echo "  export SPARQL_ENDPOINT=https://your-endpoint.com/sparql"

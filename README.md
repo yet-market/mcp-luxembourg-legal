@@ -100,8 +100,34 @@ After installation, use the provided scripts:
 # Examples
 ./start.sh http            # Start HTTP service for nginx
 ./logs.sh http             # View HTTP service logs
+./test.sh                  # Test server functionality
 ./stop.sh                  # Stop all services
 ```
+
+### Testing Your Installation
+
+Test your server with the built-in test suite:
+
+```bash
+# Run comprehensive tests
+./test.sh
+
+# Run specific tests
+./test.sh endpoint         # Test HTTP connectivity
+./test.sh service          # Test service status
+./test.sh config           # Test configuration
+./test.sh mcp              # Test MCP protocol
+./test.sh client           # Test with FastMCP client
+./test.sh info             # Show connection info
+```
+
+The test script validates:
+- ✅ Service status and health
+- ✅ HTTP endpoint connectivity  
+- ✅ MCP protocol compliance
+- ✅ Configuration validity
+- ✅ SPARQL endpoint reachability
+- ✅ FastMCP client integration
 
 ## 🔍 Usage
 
