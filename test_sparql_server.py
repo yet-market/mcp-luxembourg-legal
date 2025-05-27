@@ -15,15 +15,15 @@ from typing import Dict, Any
 # Add the project directory to the path so we can import our modules
 sys.path.insert(0, os.path.dirname(__file__))
 
-from mcp.server.fastmcp import FastMCP
-from mcp.client.session import BaseSession as Client
+from fastmcp import FastMCP
+from fastmcp.client import Client, PythonStdioTransport
 from sparql_server.core import SPARQLConfig, SPARQLServer, ResultFormat
 
 
-async def test_sparql_server():
-    """Test the SPARQL server using the FastMCP Client."""
+async def test_in_memory_client():
+    """Test the SPARQL server using in-memory FastMCP Client."""
     
-    print("=== Starting SPARQL Server Test ===")
+    print("=== Testing In-Memory FastMCP Client ===")
     
     # Create a configuration
     config = SPARQLConfig(endpoint_url="https://data.legilux.public.lu/sparqlendpoint")
@@ -38,7 +38,6 @@ async def test_sparql_server():
     @mcp.tool()
     def query(query_string: str, format: str = None) -> Dict[str, Any]:
         """Execute a SPARQL query and return the results."""
-        # Convert format string to enum if provided
         format_type = None
         if format:
             try:
@@ -47,7 +46,6 @@ async def test_sparql_server():
                 return {
                     "error": f"Invalid format: {format}. Must be one of: {', '.join([f.value for f in ResultFormat])}"
                 }
-                
         return sparql_server.query(query_string, format_type)
     
     # Define the cache tool
@@ -60,40 +58,87 @@ async def test_sparql_server():
         elif action.lower() == "stats":
             return {"status": "success", "stats": sparql_server.get_cache_stats()}
         else:
-            return {
-                "status": "error", 
-                "message": f"Invalid cache action: {action}. Must be 'clear' or 'stats'."
-            }
+            return {"status": "error", "message": f"Invalid cache action: {action}"}
     
-    # Create a client to interact with the server in-memory
+    # Test client connection
     async with Client(mcp) as client:
-        # Test the query tool
-        print("\n=== Testing Query Tool ===")
-        query_result = await client.call_tool(
-            "query", 
-            {
-                "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 2",
-                "format": "simplified"
-            }
-        )
+        print("✓ Client connected successfully")
         
-        print("\nQuery Results:")
-        print(json.dumps(query_result.json, indent=2))
+        # List tools
+        tools = await client.list_tools()
+        print(f"✓ Available tools: {[tool.name for tool in tools]}")
         
-        # Test the cache tool
-        print("\n=== Testing Cache Tool ===")
+        # Test query tool
+        query_result = await client.call_tool("query", {
+            "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 2",
+            "format": "simplified"
+        })
+        
+        # Parse the text content from the result
+        result_text = query_result[0].text
+        result_data = json.loads(result_text)
+        
+        print(f"✓ Query executed successfully: {'error' not in result_data}")
+        print(f"  Results count: {len(result_data.get('results', []))}")
+        
+        # Test cache tool
         cache_result = await client.call_tool("cache", {"action": "stats"})
+        cache_text = cache_result[0].text
+        cache_data = json.loads(cache_text)
         
-        print("\nCache Statistics:")
-        print(json.dumps(cache_result.json, indent=2))
-        
-        print("\n=== All Tests Passed ===")
+        print(f"✓ Cache stats retrieved: {cache_data.get('status') == 'success'}")
 
 
-def main():
-    """Run the tests."""
-    asyncio.run(test_sparql_server())
+async def test_stdio_client():
+    """Test the SPARQL server using stdio transport (production mode)."""
+    
+    print("\n=== Testing Stdio Transport Client ===")
+    
+    # Create stdio transport
+    transport = PythonStdioTransport(
+        script_path="server.py",
+        args=["--endpoint", "https://data.legilux.public.lu/sparqlendpoint", "--format", "simplified"]
+    )
+    
+    async with Client(transport) as client:
+        print("✓ Client connected via stdio transport")
+        
+        # List tools
+        tools = await client.list_tools()
+        print(f"✓ Available tools: {[tool.name for tool in tools]}")
+        
+        # Test query tool
+        query_result = await client.call_tool("query", {
+            "query_string": "SELECT * WHERE { ?s ?p ?o } LIMIT 1",
+            "format": "json"
+        })
+        
+        result_text = query_result[0].text
+        result_data = json.loads(result_text)
+        
+        print(f"✓ Stdio query successful: {'error' not in result_data}")
+        print(f"  Results returned: {len(result_data.get('results', []))}")
+        
+        # Test cache management
+        cache_result = await client.call_tool("cache", {"action": "clear"})
+        cache_text = cache_result[0].text
+        cache_data = json.loads(cache_text)
+        
+        print(f"✓ Cache cleared: {cache_data.get('status') == 'success'}")
+
+
+async def main():
+    """Run all tests."""
+    print("=== FastMCP SPARQL Server Tests ===")
+    
+    try:
+        await test_in_memory_client()
+        await test_stdio_client()
+        print("\n=== All Tests Passed Successfully ===")
+    except Exception as e:
+        print(f"\nTest failed with error: {e}")
+        raise
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

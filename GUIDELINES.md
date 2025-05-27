@@ -1,5 +1,28 @@
 # GUIDELINES.md - Development Guidelines
 
+## Useful Links
+
+### FastMCP Framework
+- **Official Website**: https://gofastmcp.com/
+- **GitHub Repository**: https://github.com/jlowin/fastmcp
+- **Documentation**: https://gofastmcp.com/clients/client
+- **PyPI Package**: https://pypi.org/project/fastmcp/
+
+### Model Context Protocol (MCP)
+- **Official MCP Specification**: https://spec.modelcontextprotocol.io/
+- **Anthropic MCP Documentation**: https://docs.anthropic.com/en/docs/build-with-claude/computer-use
+- **MCP Python SDK**: https://github.com/modelcontextprotocol/python-sdk
+
+### SPARQL Resources
+- **SPARQL 1.1 Specification**: https://www.w3.org/TR/sparql11-query/
+- **SPARQLWrapper Documentation**: https://sparqlwrapper.readthedocs.io/
+- **Legilux SPARQL Endpoint**: https://data.legilux.public.lu/sparqlendpoint
+
+### Development Tools
+- **Pydantic Documentation**: https://docs.pydantic.dev/
+- **Python Daemon**: https://pypi.org/project/python-daemon/
+- **RDFLib**: https://rdflib.readthedocs.io/
+
 ## Code Quality Standards
 
 ### General Guidelines

@@ -15,7 +15,7 @@ import daemon
 from typing import Dict, Any, Optional, Union, List
 from pathlib import Path
 
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from pydantic import HttpUrl
 
 from sparql_server.core import SPARQLServer, SPARQLConfig, ResultFormat, CacheStrategy

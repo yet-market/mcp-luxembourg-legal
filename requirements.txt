@@ -1,1 +1,4 @@
 python-daemon==2.3.2
+fastmcp
+SPARQLWrapper
+pydantic
