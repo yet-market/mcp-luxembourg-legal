@@ -9,10 +9,10 @@ description = "SPARQL-enabled MCP server with caching and result formatting"
 readme = "README.md"
 license = {text = "AGPL-3.0"}
 authors = [
-    {name = "Temkit Sid-Ali", email = "contact@yet.lu"}
+    {name = "Temkit Sid-Ali", email = "dev@yet.lu"}
 ]
 maintainers = [
-    {name = "Temkit Sid-Ali", email = "contact@yet.lu"}
+    {name = "Temkit Sid-Ali", email = "dev@yet.lu"}
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -68,6 +68,7 @@ Documentation = "https://github.com/yet-market/yet-sparql-mcp-server#readme"
 Repository = "https://github.com/yet-market/yet-sparql-mcp-server.git"
 Issues = "https://github.com/yet-market/yet-sparql-mcp-server/issues"
 Changelog = "https://github.com/yet-market/yet-sparql-mcp-server/blob/main/CHANGELOG.md"
+Company = "https://yet.lu"
 
 [project.scripts]
 mcp-server-sparql = "server:main"

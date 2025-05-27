@@ -541,15 +541,32 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## 🙏 Acknowledgments
+
+This project is built on top of several excellent open source projects:
+
+- **[FastMCP](https://github.com/jlowin/fastmcp)** - High-level Python framework for building MCP servers and clients by Joel Lowin
+- **[SPARQLWrapper](https://github.com/RDFLib/sparqlwrapper)** - SPARQL endpoint interface for Python by the RDFLib team
+- **[Pydantic](https://github.com/pydantic/pydantic)** - Data validation using Python type hints by Samuel Colvin and the Pydantic team
+- **[python-daemon](https://github.com/breezy-team/python-daemon)** - Library for making Unix daemon processes
+
+Special thanks to:
+- The **Model Context Protocol (MCP)** community for developing the protocol specification
+- **Anthropic** for their work on AI assistants and the MCP ecosystem
+- The **semantic web** and **RDF** communities for their foundational work
+- **W3C** for the SPARQL specification and standards
+
 ## 📬 Contact
 
 - GitHub Issues: [https://github.com/yet-market/yet-sparql-mcp-server/issues](https://github.com/yet-market/yet-sparql-mcp-server/issues)
-- Email: contact@yet.lu
+- Website: [https://yet.lu](https://yet.lu)
+- Development: dev@yet.lu
+- Commercial licensing: legal@yet.lu
 
 ---
 
 <div align="center">
-  <sub>Built with ❤️ by Temkit Sid-Ali for Yet.lu</sub>
+  <sub>Built with ❤️ by Temkit Sid-Ali for <a href="https://yet.lu">Yet.lu</a></sub>
   <br>
-  <sub>© 2025 Yet.lu - All rights reserved</sub>
+  <sub>© 2025 <a href="https://yet.lu">Yet.lu</a> - All rights reserved</sub>
 </div>

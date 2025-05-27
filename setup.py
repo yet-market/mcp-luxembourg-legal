@@ -16,7 +16,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     author="Temkit Sid-Ali",
-    author_email="contact@yet.lu",
+    author_email="dev@yet.lu",
     url="https://github.com/yet-market/yet-sparql-mcp-server",
     packages=find_packages(),
     python_requires=">=3.8",
