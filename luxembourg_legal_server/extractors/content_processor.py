@@ -34,34 +34,51 @@ class ContentProcessor:
         Returns:
             Dictionary with extracted content and metadata
         """
+        logger.info(f"🔍 EXTRACTION: Starting content extraction for: {entity_uri}")
+        logger.info(f"   📋 Strategy: {'HTML first' if prefer_html else 'PDF first'}")
+        
         if prefer_html:
             # Try HTML first (faster parsing)
+            logger.info(f"   🌐 Attempting HTML extraction...")
             content = self.html_extractor.extract_content(entity_uri)
             if content and content.get('text'):
-                logger.info(f"Successfully extracted HTML content for: {entity_uri}")
+                logger.info(f"   ✅ HTML extraction successful: {len(content.get('text', ''))} characters")
+                logger.info(f"   🎯 HTML URL: {content.get('source_url', 'unknown')}")
                 return self._enrich_content(content, entity_uri)
+            else:
+                logger.warning(f"   ❌ HTML extraction failed or empty content")
             
             # Fallback to PDF if HTML fails
-            logger.info(f"HTML extraction failed, trying PDF for: {entity_uri}")
+            logger.info(f"   📄 Falling back to PDF extraction...")
             content = self.pdf_extractor.extract_content(entity_uri)
             if content and content.get('text'):
-                logger.info(f"Successfully extracted PDF content for: {entity_uri}")
+                logger.info(f"   ✅ PDF extraction successful: {len(content.get('text', ''))} characters")
+                logger.info(f"   🎯 PDF URL: {content.get('source_url', 'unknown')}")
                 return self._enrich_content(content, entity_uri)
+            else:
+                logger.warning(f"   ❌ PDF extraction also failed or empty content")
         else:
             # Try PDF first
+            logger.info(f"   📄 Attempting PDF extraction...")
             content = self.pdf_extractor.extract_content(entity_uri)
             if content and content.get('text'):
-                logger.info(f"Successfully extracted PDF content for: {entity_uri}")
+                logger.info(f"   ✅ PDF extraction successful: {len(content.get('text', ''))} characters")
+                logger.info(f"   🎯 PDF URL: {content.get('source_url', 'unknown')}")
                 return self._enrich_content(content, entity_uri)
+            else:
+                logger.warning(f"   ❌ PDF extraction failed or empty content")
             
             # Fallback to HTML
-            logger.info(f"PDF extraction failed, trying HTML for: {entity_uri}")
+            logger.info(f"   🌐 Falling back to HTML extraction...")
             content = self.html_extractor.extract_content(entity_uri)
             if content and content.get('text'):
-                logger.info(f"Successfully extracted HTML content for: {entity_uri}")
+                logger.info(f"   ✅ HTML extraction successful: {len(content.get('text', ''))} characters")
+                logger.info(f"   🎯 HTML URL: {content.get('source_url', 'unknown')}")
                 return self._enrich_content(content, entity_uri)
+            else:
+                logger.warning(f"   ❌ HTML extraction also failed or empty content")
         
-        logger.warning(f"Failed to extract content from both HTML and PDF for: {entity_uri}")
+        logger.error(f"❌ EXTRACTION FAILED: Both HTML and PDF extraction failed for: {entity_uri}")
         return None
     
     def _enrich_content(self, content: Dict[str, Any], entity_uri: str) -> Dict[str, Any]:
@@ -74,24 +91,36 @@ class ContentProcessor:
         Returns:
             Enriched content dictionary
         """
+        logger.info(f"🔧 ENRICHMENT: Starting content enrichment for: {entity_uri}")
+        
         # Add entity URI to metadata
         content['entity_uri'] = entity_uri
         
         # Analyze document structure
+        logger.info(f"   📊 Analyzing document structure...")
         structure_info = self._analyze_document_structure(content['text'])
         content['structure'] = structure_info
+        logger.info(f"   📋 Structure: {structure_info.get('total_lines', 0)} lines, {structure_info.get('estimated_reading_time_minutes', 0)} min read")
         
         # Detect document type
+        logger.info(f"   🔍 Detecting document type...")
         doc_type = self._detect_document_type(content['text'], content.get('title', ''))
         content['document_type'] = doc_type
+        logger.info(f"   📂 Document type: {doc_type}")
         
         # Extract key legal concepts
+        logger.info(f"   ⚖️  Extracting legal concepts...")
         legal_concepts = self._extract_legal_concepts(content['text'])
         content['legal_concepts'] = legal_concepts
+        logger.info(f"   📝 Found {len(legal_concepts)} legal concepts: {', '.join(legal_concepts[:3])}{'...' if len(legal_concepts) > 3 else ''}")
         
         # Generate summary for AI context
+        logger.info(f"   📄 Generating AI-optimized summary...")
         summary = self._generate_summary(content['text'], content.get('title', ''))
         content['summary'] = summary
+        logger.info(f"   ✅ Summary generated: {len(summary)} characters")
+        
+        logger.info(f"🎉 ENRICHMENT COMPLETE: Content ready for AI consumption")
         
         return content
     

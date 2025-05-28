@@ -300,7 +300,7 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
             - Companies: use "société" or "entreprise"
             - Regulations: use "règlement" or "arrêté"
         """
-        logger.info(f"Searching Luxembourg documents for: {keywords}")
+        logger.info(f"🔍 STEP 1: Searching Luxembourg documents for: '{keywords}' (limit: {limit}, content: {include_content})")
         
         # Use exact SPARQL query as provided by user
         query = f"""
@@ -319,17 +319,26 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
         LIMIT {limit}
         """
         
+        logger.info(f"📊 STEP 2: Executing SPARQL query against {sparql_server.config.endpoint_url}")
+        logger.debug(f"📝 Query: {query}")
+        
         try:
             # Execute SPARQL query
             results = sparql_server.query(query, ResultFormat.SIMPLIFIED)
+            logger.info(f"✅ STEP 3: SPARQL query completed, processing results...")
             
             # Handle SimplifiedFormatter results - results.results is a list of simplified objects
             search_results = results.get('results', [])
+            logger.info(f"📋 STEP 4: Found {len(search_results)} matching documents")
+            
             if not search_results:
+                logger.warning("⚠️  No documents found for search criteria")
                 return {"results": [], "message": "No documents found"}
             
             documents = []
-            for result in search_results:
+            for i, result in enumerate(search_results, 1):
+                logger.info(f"📄 STEP 5.{i}: Processing document {i}/{len(search_results)}")
+                
                 doc = {
                     'uri': result.get('entity', ''),
                     'title': result.get('title', ''),
@@ -337,10 +346,20 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
                     'type': result.get('docType', ''),
                 }
                 
+                logger.info(f"   📌 Title: {doc['title'][:100]}...")
+                logger.info(f"   🔗 URI: {doc['uri']}")
+                logger.info(f"   📅 Date: {doc['date']}")
+                logger.info(f"   📋 Type: {doc['type']}")
+                
                 # Extract full content if requested
                 if include_content and doc['uri']:
+                    logger.info(f"   🔍 STEP 6.{i}: Extracting content from document...")
                     content = content_processor.extract_entity_content(doc['uri'])
                     if content:
+                        logger.info(f"   ✅ Content extracted: {len(content.get('text', ''))} characters")
+                        logger.info(f"   📝 Content type: {content.get('content_type', 'unknown')}")
+                        logger.info(f"   🎯 Source URL: {content.get('source_url', 'unknown')}")
+                        
                         doc.update({
                             'content': content.get('text', ''),
                             'summary': content.get('summary', ''),
@@ -349,8 +368,18 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
                             'content_source': content.get('source_url', ''),
                             'content_type': content.get('content_type', '')
                         })
+                        
+                        # Log sample of content
+                        sample_content = content.get('text', '')[:200] if content.get('text') else ''
+                        logger.info(f"   📖 Content sample: {sample_content}...")
+                    else:
+                        logger.warning(f"   ❌ Failed to extract content from {doc['uri']}")
+                else:
+                    logger.info(f"   ⏭️  Skipping content extraction (include_content={include_content})")
                 
                 documents.append(doc)
+            
+            logger.info(f"🎯 STEP 7: Search completed! Returning {len(documents)} documents with content")
             
             return {
                 "results": documents,
@@ -359,7 +388,8 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
             }
             
         except Exception as e:
-            logger.error(f"Error searching documents: {e}")
+            logger.error(f"❌ ERROR: Search failed at step: {str(e)}")
+            logger.exception("Full error traceback:")
             return {"error": f"Search failed: {str(e)}"}
     
     
