@@ -15,7 +15,7 @@ import asyncio
 from dotenv import load_dotenv
 from openai import AsyncOpenAI
 from fastmcp.client.transports import StreamableHttpTransport
-from fastmcp import FastMCPClient
+from fastmcp import Client
 
 # Load environment variables
 load_dotenv()
@@ -36,7 +36,7 @@ async def test_fastmcp_client():
         # Create FastMCP client with StreamableHttpTransport
         transport = StreamableHttpTransport(url=MCP_SERVER_URL)
         
-        async with FastMCPClient(transport) as client:
+        async with Client(transport) as client:
             # Test server info
             print("🤝 Getting server info...")
             server_info = await client.get_server_info()
@@ -76,7 +76,7 @@ async def search_luxembourg_documents(keywords: str, limit: int = 3):
     try:
         transport = StreamableHttpTransport(url=MCP_SERVER_URL)
         
-        async with FastMCPClient(transport) as client:
+        async with Client(transport) as client:
             result = await client.call_tool(
                 "search_luxembourg_documents",
                 {

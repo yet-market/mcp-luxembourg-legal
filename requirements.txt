@@ -1,4 +1,4 @@
-fastmcp
+fastmcp==2.4.0  # Pin to avoid issue #601 in 2.5.1
 SPARQLWrapper
 pydantic
 python-daemon>=2.3.0
