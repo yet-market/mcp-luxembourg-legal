@@ -375,11 +375,11 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     
     # Run the MCP server with the specified transport
     if transport == "streamable-http":
-        logger.info(f"Starting streamable HTTP server on {host}:{port}")
+        logger.info(f"Starting streamable HTTP server on {host}:{port} at /mcp")
         mcp.run(transport="streamable-http", host=host, port=port, path="/mcp")
     elif transport == "sse":
-        logger.info(f"Starting SSE server on {host}:{port}")
-        mcp.run(transport="sse", host=host, port=port)
+        logger.info(f"Starting SSE server on {host}:{port} at /sse")
+        mcp.run(transport="sse", host=host, port=port, path="/sse")
     else:
         logger.info("Starting stdio transport")
         mcp.run(transport="stdio")
