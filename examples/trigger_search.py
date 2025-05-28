@@ -20,7 +20,7 @@ async def trigger_search():
     try:
         response = await client.responses.create(
             model="gpt-4.1",
-            input="Find Luxembourg tax regulations",
+            input="Search for the latest Luxembourg tax regulations from 2024-2025 in the official legal database. I need specific document titles, dates, and legal references.",
             tools=[
                 {
                     "type": "mcp",
