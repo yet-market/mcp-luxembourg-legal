@@ -11,8 +11,8 @@ fi
 source venv/bin/activate
 
 if [ -z "$SPARQL_ENDPOINT" ]; then
-    echo "⚠️  SPARQL_ENDPOINT not set. Using default endpoint."
-    export SPARQL_ENDPOINT="https://dbpedia.org/sparql"
+    echo "⚠️  SPARQL_ENDPOINT not set. Using Luxembourg default endpoint."
+    export SPARQL_ENDPOINT="https://data.legilux.public.lu/sparqlendpoint"
 fi
 
 if [ "$1" = "stdio" ]; then

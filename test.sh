@@ -162,11 +162,12 @@ test_with_fastmcp() {
     if [ -f "venv/bin/activate" ]; then
         print_info "Running Python FastMCP client test..."
         
-        # Create a simple test script
+        # Create a Luxembourg Legal-specific test script
         cat > /tmp/test_mcp_client.py << 'EOF'
 import asyncio
 import sys
 import os
+import json
 from fastmcp.client import Client, HttpTransport
 
 async def test_mcp_client():
@@ -176,15 +177,30 @@ async def test_mcp_client():
         async with Client(transport) as client:
             # Test connection and list tools
             tools = await client.list_tools()
-            print(f"✅ Connected! Available tools: {[tool.name for tool in tools]}")
+            tool_names = [tool.name for tool in tools]
+            print(f"✅ Connected! Available tools: {tool_names}")
             
-            # Test basic query if tools are available
-            if tools:
+            # Test Luxembourg-specific functionality
+            if "search_luxembourg_documents" in tool_names:
+                try:
+                    result = await client.call_tool("search_luxembourg_documents", {
+                        "keywords": "taxe", 
+                        "limit": 1, 
+                        "include_content": False
+                    })
+                    result_data = json.loads(result[0].text)
+                    doc_count = len(result_data.get('results', []))
+                    print(f"✅ Luxembourg search successful: Found {doc_count} documents")
+                except Exception as e:
+                    print(f"⚠️  Luxembourg search failed: {e}")
+            
+            # Test basic cache functionality
+            if "cache" in tool_names:
                 try:
                     result = await client.call_tool("cache", {"action": "stats"})
-                    print(f"✅ Tool test successful: {result[0].text[:100]}...")
+                    print(f"✅ Cache test successful")
                 except Exception as e:
-                    print(f"⚠️  Tool test failed: {e}")
+                    print(f"⚠️  Cache test failed: {e}")
             
             return True
             
