@@ -302,7 +302,21 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
         """
         logger.info(f"🔍 STEP 1: Searching Luxembourg documents for: '{keywords}' (limit: {limit}, content: {include_content})")
         
-        # Use exact SPARQL query as provided by user
+        # Extract meaningful words from keywords for better search
+        import re
+        # Extract words that are 3+ characters and meaningful
+        words = re.findall(r'\b[a-zA-ZàâäéèêëïîôöùûüçÀÂÄÉÈÊËÏÎÔÖÙÛÜÇ]{3,}\b', keywords)
+        
+        # Create regex pattern for any of the words (case insensitive)
+        if words:
+            word_pattern = '|'.join(words)
+            logger.info(f"   🔍 Extracted search words: {words}")
+        else:
+            # Fallback: use original keywords
+            word_pattern = keywords
+            logger.info(f"   🔍 Using original keywords: {keywords}")
+        
+        # Use SPARQL query that searches for any of the extracted words
         query = f"""
         PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -313,7 +327,7 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
                     a ?docType ;
                     jolux:isRealizedBy ?expression .
             ?expression jolux:title ?title .
-            FILTER(regex(str(?title), '{keywords}'^^xsd:string))
+            FILTER(regex(str(?title), '{word_pattern}', 'i'))
         }}
         ORDER BY DESC(?date)
         LIMIT {limit}
