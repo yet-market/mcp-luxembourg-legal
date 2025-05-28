@@ -101,8 +101,8 @@ if [ "$INSTALL_SYSTEMD" = true ]; then
 # SPARQL endpoint URL (required)
 SPARQL_ENDPOINT=https://data.legilux.public.lu/sparqlendpoint
 
-# Transport configuration
-MCP_TRANSPORT=stdio
+# Transport configuration  
+MCP_TRANSPORT=streamable-http
 MCP_HOST=localhost
 MCP_PORT=8000
 
@@ -136,7 +136,7 @@ Type=simple
 User=$SERVICE_USER
 Group=$SERVICE_USER
 WorkingDirectory=$INSTALL_DIR
-EnvironmentFile=/etc/mcp-sparql/env
+EnvironmentFile=-/etc/mcp-sparql/env
 ExecStart=$INSTALL_DIR/venv/bin/python server.py
 ExecReload=/bin/kill -s HUP \$MAINPID
 Restart=always
@@ -173,7 +173,7 @@ Type=simple
 User=$SERVICE_USER
 Group=$SERVICE_USER
 WorkingDirectory=$INSTALL_DIR
-EnvironmentFile=/etc/mcp-sparql/env
+EnvironmentFile=-/etc/mcp-sparql/env
 ExecStart=$INSTALL_DIR/venv/bin/python server.py --transport streamable-http --host localhost --port 8000
 ExecReload=/bin/kill -s HUP \$MAINPID
 Restart=always
