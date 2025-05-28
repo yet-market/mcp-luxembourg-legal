@@ -276,7 +276,7 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     
     # Luxembourg Legal Intelligence Tools
     
-    @mcp.tool(description="Search Luxembourg legal documents with full content extraction. IMPORTANT: Use FRENCH keywords (Luxembourg documents are in French). Examples: 'taxe' not 'tax', 'environnement' not 'environmental', 'société' not 'company'.")
+    @mcp.tool(description="Search Luxembourg legal documents with full content extraction. Use SINGLE FRENCH LEGAL KEYWORDS only. Multiple keywords use pipe separator for OR logic: 'taxe|société|environnement'. Keywords must be legal-related terms in French to find specific documents.")
     def search_luxembourg_documents(
         keywords: str,
         limit: int = 10,
@@ -284,10 +284,14 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     ) -> Dict[str, Any]:
         """Search Luxembourg legal documents and extract full content.
         
-        IMPORTANT: Luxembourg legal documents are in FRENCH. Use French keywords for best results.
+        CRITICAL: Use SINGLE FRENCH LEGAL KEYWORDS only, separated by | for OR logic.
         
         Args:
-            keywords: Search keywords in FRENCH (e.g., 'taxe', 'environnement', 'société', 'règlement')
+            keywords: French legal keywords with | separator (e.g., 'taxe|impôt', 'société|entreprise')
+                     - ONE WORD per concept (not phrases)
+                     - LEGAL-RELATED terms only  
+                     - FRENCH language only
+                     - Multiple keywords: use | for OR logic
             limit: Maximum number of results (default: 10)
             include_content: Whether to extract full document content (default: true)
             
@@ -295,28 +299,22 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
             List of documents with metadata and full content
             
         Examples:
-            - Tax laws: use "taxe" or "impôt" or "fiscal"
-            - Environmental: use "environnement" or "écologie" 
-            - Companies: use "société" or "entreprise"
-            - Regulations: use "règlement" or "arrêté"
+            ✅ GOOD: 'taxe', 'société|entreprise', 'travail|employé', 'environnement'
+            ❌ BAD: 'quelles sont les taxes', 'create company', 'luxembourg'
+            
+        Legal keyword categories:
+            - Taxes: 'taxe|impôt|fiscal'
+            - Companies: 'société|entreprise|commercial'
+            - Employment: 'travail|employé|salarié'
+            - Environment: 'environnement|écologie'
+            - Regulations: 'règlement|arrêté|loi'
         """
         logger.info(f"🔍 STEP 1: Searching Luxembourg documents for: '{keywords}' (limit: {limit}, content: {include_content})")
         
-        # Extract meaningful words from keywords for better search
-        import re
-        # Extract words that are 3+ characters and meaningful
-        words = re.findall(r'\b[a-zA-ZàâäéèêëïîôöùûüçÀÂÄÉÈÊËÏÎÔÖÙÛÜÇ]{3,}\b', keywords)
+        # Use keywords directly as provided by AI (should be in format: 'taxe|société|environnement')
+        logger.info(f"   🔍 Using AI-provided keywords: {keywords}")
         
-        # Create regex pattern for any of the words (case insensitive)
-        if words:
-            word_pattern = '|'.join(words)
-            logger.info(f"   🔍 Extracted search words: {words}")
-        else:
-            # Fallback: use original keywords
-            word_pattern = keywords
-            logger.info(f"   🔍 Using original keywords: {keywords}")
-        
-        # Use SPARQL query that searches for any of the extracted words
+        # Use SPARQL query with the keywords (case insensitive search)
         query = f"""
         PREFIX jolux: <http://data.legilux.public.lu/resource/ontology/jolux#>
         PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
@@ -327,7 +325,7 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
                     a ?docType ;
                     jolux:isRealizedBy ?expression .
             ?expression jolux:title ?title .
-            FILTER(regex(str(?title), '{word_pattern}', 'i'))
+            FILTER(regex(str(?title), '{keywords}', 'i'))
         }}
         ORDER BY DESC(?date)
         LIMIT {limit}
