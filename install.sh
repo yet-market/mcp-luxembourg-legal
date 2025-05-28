@@ -99,7 +99,7 @@ if [ "$INSTALL_SYSTEMD" = true ]; then
 # MCP SPARQL Server environment configuration
 
 # SPARQL endpoint URL (required)
-SPARQL_ENDPOINT=https://dbpedia.org/sparql
+SPARQL_ENDPOINT=https://data.legilux.public.lu/sparqlendpoint
 
 # Transport configuration
 MCP_TRANSPORT=stdio
@@ -406,8 +406,8 @@ fi
 source venv/bin/activate
 
 if [ -z "$SPARQL_ENDPOINT" ]; then
-    echo "⚠️  SPARQL_ENDPOINT not set. Using default endpoint."
-    export SPARQL_ENDPOINT="https://dbpedia.org/sparql"
+    echo "⚠️  SPARQL_ENDPOINT not set. Using Luxembourg legal endpoint."
+    export SPARQL_ENDPOINT="https://data.legilux.public.lu/sparqlendpoint"
 fi
 
 if [ "$1" = "stdio" ]; then
@@ -438,9 +438,9 @@ EOF
     echo "  ./test.sh                - Test server functionality"
     echo
     echo "🚀 Quick start:"
-    echo "  export SPARQL_ENDPOINT=https://your-endpoint.com/sparql"
-    echo "  ./start.sh http    # Start HTTP server"
+    echo "  ./start.sh http    # Start HTTP server (default: Luxembourg endpoint)"
     echo "  ./start.sh stdio   # Start stdio server"
+    echo "  export SPARQL_ENDPOINT=https://other-endpoint.com/sparql  # To use different endpoint"
     echo
     echo "📝 Manual commands:"
     echo "  source venv/bin/activate"
