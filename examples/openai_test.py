@@ -22,8 +22,8 @@ load_dotenv()
 # Initialize OpenAI client
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# MCP Server Configuration
-MCP_SERVER_URL = "https://yet-mcp-legilux.site/mcp/"
+# MCP Server Configuration  
+MCP_SERVER_URL = "https://yet-mcp-legilux.site/"  # SSE transport uses root path
 
 class MCPClient:
     """MCP Streamable HTTP Client with session management"""

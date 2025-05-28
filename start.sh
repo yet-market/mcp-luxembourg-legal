@@ -19,11 +19,11 @@ if [ "$1" = "stdio" ]; then
     echo "🚀 Starting stdio server..."
     python server.py --endpoint "$SPARQL_ENDPOINT"
 elif [ "$1" = "http" ]; then
-    echo "🚀 Starting HTTP server..."
-    python server.py --transport streamable-http --host localhost --port 8000 --endpoint "$SPARQL_ENDPOINT"
+    echo "🚀 Starting HTTP server (SSE transport)..."
+    python server.py --transport sse --host localhost --port 8000 --endpoint "$SPARQL_ENDPOINT"
 else
-    echo "🚀 Starting HTTP server (default)..."
-    echo "🌐 Server will be available at: http://localhost:8000/mcp/"
+    echo "🚀 Starting HTTP server (SSE transport - default)..."
+    echo "🌐 Server will be available at: http://localhost:8000/"
     echo "Use './start.sh stdio' for stdio mode"
-    python server.py --transport streamable-http --host localhost --port 8000 --endpoint "$SPARQL_ENDPOINT"
+    python server.py --transport sse --host localhost --port 8000 --endpoint "$SPARQL_ENDPOINT"
 fi
