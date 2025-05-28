@@ -376,7 +376,26 @@ def run_server(config: SPARQLConfig, transport: str = "stdio", host: str = "loca
     # Run the MCP server with the specified transport
     if transport == "streamable-http":
         logger.info(f"Starting streamable HTTP server on {host}:{port} at /mcp")
-        mcp.run(transport="streamable-http", host=host, port=port, path="/mcp")
+        
+        # Use proper ASGI integration to fix StreamableHTTPSessionManager
+        from starlette.applications import Starlette
+        from starlette.routing import Mount
+        import uvicorn
+        
+        # Create FastMCP ASGI app with proper lifespan
+        mcp_app = mcp.http_app(path="/mcp")
+        
+        # Create main app with FastMCP lifespan (critical for SessionManager)
+        app = Starlette(
+            routes=[
+                Mount("/", app=mcp_app),
+            ],
+            lifespan=mcp_app.lifespan,  # This fixes the SessionManager issue
+        )
+        
+        # Run with uvicorn
+        uvicorn.run(app, host=host, port=port, log_level="info")
+        
     elif transport == "sse":
         logger.info(f"Starting SSE server on {host}:{port} at /sse")
         mcp.run(transport="sse", host=host, port=port, path="/sse")

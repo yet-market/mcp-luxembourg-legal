@@ -2,6 +2,8 @@ fastmcp>=2.5.1
 SPARQLWrapper
 pydantic
 python-daemon>=2.3.0
+uvicorn>=0.23.1
+starlette>=0.27
 
 # Luxembourg Legal Processing Dependencies
 langchain>=0.1.0
